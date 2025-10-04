@@ -32,10 +32,10 @@ export const authOptions = {
             user.password
           )
 
-          console.log('🔍 Authorize: Password valid:', isPasswordValid)
+          console.log('Authorize: Password valid:', isPasswordValid)
 
           if (!isPasswordValid) {
-            console.log('❌ Authorize: Invalid password')
+            console.log('Authorize: Invalid password')
             return null
           }
 
@@ -46,10 +46,10 @@ export const authOptions = {
             role: user.roleRef?.name || 'user'
           }
           
-          console.log('✅ Authorize: Returning user object:', JSON.stringify(userObject))
+          console.log('Authorize: Returning user object:', JSON.stringify(userObject))
           return userObject
         } catch (error) {
-          console.error('❌ Authorize: Database error:', error)
+          console.error('Authorize: Database error:', error)
           return null
         }
       }

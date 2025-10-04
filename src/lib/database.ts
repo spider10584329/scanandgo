@@ -37,39 +37,39 @@ export async function initializeDatabase() {
             role: adminRole.id
           }
         })        
-        console.log('✅ Default admin user created: admin@scanandgo.com / admin123')
+        console.log('Default admin user created: admin@scanandgo.com / admin123')
       } else {
-        console.log('⚠️  Admin role not found - skipping admin user creation')
+        console.log('Admin role not found - skipping admin user creation')
       }
     } else {
-      console.log('ℹ️  Users already exist - skipping admin user creation')
+      console.log('Users already exist - skipping admin user creation')
     }
     
-    console.log('🎉 Database initialization completed safely')
+    console.log('Database initialization completed safely')
   } catch (error) {
-    console.error('❌ Database initialization error:', error)
+    console.error('Database initialization error:', error)
     throw error // Re-throw to let caller handle
   }
 }
 
 export async function getUserWithRole(username: string) {
-  console.log('🔍 Looking up user:', username)
+  console.log('Looking up user:', username)
   
   const user = await prisma.users.findUnique({
     where: { username }
   })
   
-  console.log('👤 User found:', user ? { id: user.id, username: user.username, roleId: user.role } : 'No user found')
+  console.log('User found:', user ? { id: user.id, username: user.username, roleId: user.role } : 'No user found')
   
   if (user) {
     const role = await prisma.role.findUnique({
       where: { id: user.role || 0 }
     })
     
-    console.log('🎭 Role found:', role ? { id: role.id, name: role.name } : 'No role found')
+    console.log('Role found:', role ? { id: role.id, name: role.name } : 'No role found')
     
     const result = { ...user, roleRef: role }
-    console.log('✅ Final user object:', { 
+    console.log('Final user object:', { 
       id: result.id, 
       username: result.username, 
       roleRef: result.roleRef 
@@ -78,7 +78,7 @@ export async function getUserWithRole(username: string) {
     return result
   }
   
-  console.log('❌ No user found for username:', username)
+  console.log('No user found for username:', username)
   return null
 }
 
@@ -112,35 +112,35 @@ export async function verifyPassword(password: string, hashedPassword: string) {
 // SAFE: Test database connection without modifying anything
 export async function testDatabaseConnection() {
   try {
-    console.log('🔍 Testing database connection (read-only)...')
+    console.log('Testing database connection (read-only)...')
     
     // Test basic connection
     await prisma.$connect()
-    console.log('✅ Database connection successful')
+    console.log('Database connection successful')
     
     // Check what tables exist (read-only)
     const tables = await prisma.$queryRaw`SHOW TABLES`
-    console.log('📋 Available tables:', tables)
+    console.log('Available tables:', tables)
     
     // Test role table access (read-only)
     try {
       const roleCount = await prisma.role.count()
-      console.log(`📊 Roles table: ${roleCount} roles found`)
+      console.log(`Roles table: ${roleCount} roles found`)
     } catch (error) {
-      console.log('⚠️  Could not access role table:', error instanceof Error ? error.message : 'Unknown error')
+      console.log('Could not access role table:', error instanceof Error ? error.message : 'Unknown error')
     }
     
     // Test users table access (read-only)  
     try {
       const userCount = await prisma.users.count()
-      console.log(`👥 Users table: ${userCount} users found`)
+      console.log(`Users table: ${userCount} users found`)
     } catch (error) {
-      console.log('⚠️  Could not access user table:', error instanceof Error ? error.message : 'Unknown error')
+      console.log('Could not access user table:', error instanceof Error ? error.message : 'Unknown error')
     }
     
     return true
   } catch (error) {
-    console.error('❌ Database connection test failed:', error)
+    console.error('Database connection test failed:', error)
     return false
   } finally {
     await prisma.$disconnect()
