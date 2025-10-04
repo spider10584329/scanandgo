@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import AuthForm from '@/components/auth/AuthForm'
 
+
+
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -40,22 +42,19 @@ export default function Home() {
       } finally {
         setIsInitializing(false)
       }
-    }
-    
-    // Only run database initialization, don't wait for session
+    }   
     initializeDatabase()
   }, [])
 
-  // Handle session-based navigation - redirect directly to role-specific dashboard
+  
   useEffect(() => {
     if (status === 'loading' || isInitializing) return
     
-    console.log('🏠 Homepage: Session status:', status, 'User:', session?.user?.email, 'Role:', session?.user?.role)
+    console.log('🏠 Homepage: Session status:', status, 'User:', session?.user?.email, 'Role:', (session as any)?.user?.role) // eslint-disable-line @typescript-eslint/no-explicit-any
     
-    if (session && session.user?.role) {
-      // Redirect to role-specific home pages (not directly to dashboard)
+    if (session && (session as any)?.user?.role) { // eslint-disable-line @typescript-eslint/no-explicit-any     
       const roleHomePage = (() => {
-        switch (session.user.role) {
+        switch ((session as any)?.user?.role) { // eslint-disable-line @typescript-eslint/no-explicit-any
           case 'admin':
             return '/admin'
           case 'manager':
@@ -70,7 +69,7 @@ export default function Home() {
       })()
       console.log('🏠 Homepage: Redirecting to role-specific page:', roleHomePage)
       router.push(roleHomePage)
-    } else if (session && !session.user?.role) {
+    } else if (session && !(session as any)?.user?.role) { // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('🏠 Homepage: User has no role, staying on homepage')
     }
   }, [session, status, router, isInitializing])

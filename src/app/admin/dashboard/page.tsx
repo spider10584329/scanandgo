@@ -1,7 +1,7 @@
 'use client'
 
 import { signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+
 import { Button } from '@/components/ui/button'
 import { useRoleProtection } from '@/hooks/useRoleProtection'
 import { ProtectedPageLoading } from '@/components/auth/ProtectedPageLoading'
@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Users, Settings, UserCheck, Shield } from 'lucide-react'
 
 export default function AdminDashboard() {
-  const router = useRouter()
   const { isLoading, isAuthorized, session } = useRoleProtection({
     allowedRoles: ['admin']
   })

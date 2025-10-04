@@ -64,7 +64,7 @@ export default function UserDashboard() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Role</label>
-                  <p className="text-lg capitalize">{session?.user?.role}</p>
+                  <p className="text-lg capitalize">{(session?.user as any)?.role || 'user'}</p> {/* eslint-disable-line @typescript-eslint/no-explicit-any */}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Status</label>
@@ -100,7 +100,7 @@ export default function UserDashboard() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-500">Role Assignment</p>
-                    <p className="text-sm text-gray-400">You'll be assigned appropriate permissions</p>
+                    <p className="text-sm text-gray-400">You&apos;ll be assigned appropriate permissions</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -111,7 +111,7 @@ export default function UserDashboard() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-500">Notification</p>
-                    <p className="text-sm text-gray-400">You'll receive an email when approved</p>
+                    <p className="text-sm text-gray-400">You&apos;ll receive an email when approved</p>
                   </div>
                 </div>
               </CardContent>

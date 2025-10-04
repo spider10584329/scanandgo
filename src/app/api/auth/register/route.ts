@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       user: {
         id: user.id,
         email: user.username,
-        role: user.role.name
+        role: user.roleRef?.name || 'user'
       }
     })
   } catch (error) {

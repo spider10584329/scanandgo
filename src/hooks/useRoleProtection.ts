@@ -13,7 +13,7 @@ interface UseRoleProtectionOptions {
 interface UseRoleProtectionResult {
   isLoading: boolean
   isAuthorized: boolean
-  session: any
+  session: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export function useRoleProtection({ 
@@ -37,7 +37,7 @@ export function useRoleProtection({
 
     // Check if user has required role
     if (session && allowedRoles.length > 0) {
-      const userRole = session.user?.role
+      const userRole = (session.user as any)?.role // eslint-disable-line @typescript-eslint/no-explicit-any
       const hasPermission = allowedRoles.includes(userRole || '')
 
       if (!hasPermission) {

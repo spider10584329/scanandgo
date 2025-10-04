@@ -1,7 +1,7 @@
 'use client'
 
 import { signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+
 import { Button } from '@/components/ui/button'
 import { useRoleProtection } from '@/hooks/useRoleProtection'
 import { ProtectedPageLoading } from '@/components/auth/ProtectedPageLoading'
@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle, Clock, Mail } from 'lucide-react'
 
 export default function UserHome() {
-  const router = useRouter()
   const { isLoading, isAuthorized, session } = useRoleProtection({
     allowedRoles: ['admin', 'manager', 'agent', 'user'] // All authenticated users
   })
@@ -111,7 +110,7 @@ export default function UserHome() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-500">Role Assignment</p>
-                    <p className="text-sm text-gray-400">You'll be assigned appropriate permissions</p>
+                    <p className="text-sm text-gray-400">You&apos;ll be assigned appropriate permissions</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -122,7 +121,7 @@ export default function UserHome() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-500">Notification</p>
-                    <p className="text-sm text-gray-400">You'll receive an email when approved</p>
+                    <p className="text-sm text-gray-400">You&apos;ll receive an email when approved</p>
                   </div>
                 </div>
               </CardContent>

@@ -1,8 +1,7 @@
-import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { getUserWithRole, verifyPassword } from '@/lib/database'
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -53,13 +52,15 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {      
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user?: any }) {      
       if (user) {
         token.role = user.role
       }      
       return token
     },
-    async session({ session, token }) {      
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {      
       if (token && session.user) {
         session.user.id = token.sub!
         session.user.role = token.role

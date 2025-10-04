@@ -63,7 +63,7 @@ export async function getUserWithRole(username: string) {
   
   if (user) {
     const role = await prisma.role.findUnique({
-      where: { id: user.role }
+      where: { id: user.role || 0 }
     })
     
     console.log('🎭 Role found:', role ? { id: role.id, name: role.name } : 'No role found')
