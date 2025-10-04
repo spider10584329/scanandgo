@@ -28,6 +28,12 @@ export default withAuth(
           return false
         }
 
+        // Check if token is expired (additional safety check)
+        if (token.exp && Date.now() >= (token.exp as number) * 1000) {
+          console.log(`❌ Access denied: Token expired for user ${userEmail}`)
+          return false
+        }
+
         // Comprehensive role-based access control
         
         // Admin routes - Only admins can access

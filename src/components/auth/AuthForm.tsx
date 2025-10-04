@@ -7,6 +7,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSessionCleanup } from '@/hooks/useSessionCleanup'
 
 
 interface AuthFormProps {
@@ -20,6 +21,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  
+  // Clean up any stale session data
+  const { cleanupSession } = useSessionCleanup()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,6 +84,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
         console.log('🔐 Attempting sign-in for user:', email)
         
         try {
+          // Clean up any existing session data before new login
+          cleanupSession()
+          
           const result = await signIn('credentials', {
             username: email,
             password,

@@ -27,7 +27,7 @@ export async function initializeDatabase() {
       
       if (adminRole) {
         // Use a strong default password that won't trigger browser warnings
-        const strongPassword = 'ScanGo2024!Admin#Secure'
+        const strongPassword = 'admin123'
         const hashedPassword = await bcrypt.hash(strongPassword, 12)
         
         await prisma.users.create({
@@ -37,7 +37,7 @@ export async function initializeDatabase() {
             role: adminRole.id
           }
         })        
-        console.log('✅ Default admin user created: admin@scanandgo.com / ScanGo2024!Admin#Secure')
+        console.log('✅ Default admin user created: admin@scanandgo.com / admin123')
       } else {
         console.log('⚠️  Admin role not found - skipping admin user creation')
       }

@@ -24,11 +24,15 @@ export const authOptions = {
             return null
           }
 
-          console.log('🔍 Authorize: User found, verifying password...')
+          console.log('🔍 Authorize: User found:', user.username, 'Role:', user.roleRef?.name)
+          console.log('🔍 Authorize: Verifying password...')
+          
           const isPasswordValid = await verifyPassword(
             credentials.password,
             user.password
           )
+
+          console.log('🔍 Authorize: Password valid:', isPasswordValid)
 
           if (!isPasswordValid) {
             console.log('❌ Authorize: Invalid password')
@@ -42,7 +46,7 @@ export const authOptions = {
             role: user.roleRef?.name || 'user'
           }
           
-          console.log('✅ Authorize: Returning user object:', userObject)
+          console.log('✅ Authorize: Returning user object:', JSON.stringify(userObject))
           return userObject
         } catch (error) {
           console.error('❌ Authorize: Database error:', error)
@@ -73,6 +77,7 @@ export const authOptions = {
     signIn: '/auth/signin'
   },
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 0.2 * 60 * 60, // 24 hours
   }
 }

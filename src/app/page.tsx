@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import AuthForm from '@/components/auth/AuthForm'
+import { useSessionCleanup } from '@/hooks/useSessionCleanup'
 
 
 
@@ -12,6 +13,9 @@ export default function Home() {
   const router = useRouter()
   const [isInitializing, setIsInitializing] = useState(true)
   const [initError, setInitError] = useState<string | null>(null)
+  
+  // Enable session cleanup on browser close and inactivity
+  useSessionCleanup()
 
   // Initialize database on first visit
   useEffect(() => {
