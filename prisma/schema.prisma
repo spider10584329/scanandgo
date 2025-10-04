@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model role {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique(map: "name") @db.VarChar(120)
+  users users[]
+
+  @@map("role")
+}
+
+model users {
+  id       Int    @id @default(autoincrement())
+  username String @unique(map: "username") @db.VarChar(120)
+  password String @db.VarChar(120)
+  role     Int?
+  roleRef  role?  @relation(fields: [role], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "users_ibfk_1")
+
+  @@index([role], map: "role")
+  @@map("users")
+}
+
+model alembic_version {
+  version_num String @id @db.VarChar(32)
+}
+
+model areas {
+  id          Int           @id @default(autoincrement())
+  customer_id Int
+  building_id Int?
+  name        String        @db.VarChar(120)
+  buildings   buildings?    @relation(fields: [building_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "areas_ibfk_1")
+  floors      floors[]
+  inventories inventories[]
+
+  @@index([building_id], map: "building_id")
+}
+
+model buildings {
+  id          Int           @id @default(autoincrement())
+  customer_id Int
+  name        String        @unique(map: "name") @db.VarChar(120)
+  areas       areas[]
+  inventories inventories[]
+}
+
+model categories {
+  id          Int           @id @default(autoincrement())
+  customer_id Int
+  name        String        @unique(map: "name") @db.VarChar(120)
+  inventories inventories[]
+  items       items[]
+}
+
+model detail_locations {
+  id          Int           @id @default(autoincrement())
+  customer_id Int
+  floor_id    Int?
+  name        String        @db.VarChar(120)
+  img_data    String?       @db.VarChar(120)
+  floors      floors?       @relation(fields: [floor_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "detail_locations_ibfk_1")
+  inventories inventories[]
+
+  @@index([floor_id], map: "floor_id")
+}
+
+model floors {
+  id               Int                @id @default(autoincrement())
+  customer_id      Int
+  area_id          Int?
+  name             String             @db.VarChar(120)
+  detail_locations detail_locations[]
+  areas            areas?             @relation(fields: [area_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "floors_ibfk_1")
+  inventories      inventories[]
+
+  @@index([area_id], map: "area_id")
+}
+
+model inventories {
+  id                  Int               @id @default(autoincrement())
+  customer_id         Int
+  category_id         Int?
+  item_id             Int?
+  building_id         Int?
+  area_id             Int?
+  floor_id            Int?
+  detail_location_id  Int?
+  purchase_date       String?           @db.VarChar(120)
+  last_date           String?           @db.VarChar(120)
+  ref_client          String?           @db.VarChar(120)
+  status              Int?
+  reg_date            String?           @db.VarChar(120)
+  inv_date            String?           @db.VarChar(120)
+  comment             String?           @db.VarChar(120)
+  rfid                String?           @db.VarChar(120)
+  barcode             String?           @db.VarChar(120)
+  operator_id         Int?
+  room_assignment     String?           @db.VarChar(120)
+  category_df_immonet String?           @db.VarChar(120)
+  purchase_amount     Int?
+  is_throw            Boolean?
+  areas               areas?            @relation(fields: [area_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "inventories_ibfk_1")
+  buildings           buildings?        @relation(fields: [building_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "inventories_ibfk_2")
+  categories          categories?       @relation(fields: [category_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "inventories_ibfk_3")
+  detail_locations    detail_locations? @relation(fields: [detail_location_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "inventories_ibfk_4")
+  floors              floors?           @relation(fields: [floor_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "inventories_ibfk_5")
+  items               items?            @relation(fields: [item_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "inventories_ibfk_6")
+  operators           operators?        @relation(fields: [operator_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "inventories_ibfk_7")
+
+  @@index([area_id], map: "area_id")
+  @@index([building_id], map: "building_id")
+  @@index([category_id], map: "category_id")
+  @@index([detail_location_id], map: "detail_location_id")
+  @@index([floor_id], map: "floor_id")
+  @@index([item_id], map: "item_id")
+  @@index([operator_id], map: "operator_id")
+}
+
+model items {
+  id          Int           @id @default(autoincrement())
+  customer_id Int
+  category_id Int?
+  name        String        @db.VarChar(120)
+  barcode     String?       @db.VarChar(120)
+  inventories inventories[]
+  categories  categories?   @relation(fields: [category_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "items_ibfk_1")
+
+  @@index([category_id], map: "category_id")
+}
+
+model missing_items {
+  id          Int     @id @default(autoincrement())
+  customer_id Int?
+  location_id Int?
+  barcode     String? @db.VarChar(255)
+}
+
+model operators {
+  id                Int           @id @default(autoincrement())
+  customer_id       Int
+  username          String        @unique(map: "username") @db.VarChar(120)
+  password          String        @db.VarChar(120)
+  passwordRequest   String?       @db.VarChar(255)
+  isPasswordRequest Int?
+  isActive          Int?          @default(0) @db.TinyInt
+  inventories       inventories[]
+}
+
+model snapshots {
+  id          Int     @id @default(autoincrement())
+  customer_id Int
+  name        String? @db.VarChar(120)
+  date        String? @db.VarChar(120)
+}
