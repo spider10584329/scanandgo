@@ -32,7 +32,7 @@ export default function UserLogin() {
         toastError(response.data.message || 'Login failed. Please check your credentials.')
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error)
       toastError('Failed to connect to server')
     } finally {
@@ -73,16 +73,19 @@ export default function UserLogin() {
         }
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Password reset error:', error)
       let errorMessage = 'Failed to submit password reset request'
 
-      if (error.code === 'ERR_NETWORK') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'ERR_NETWORK') {
         errorMessage = 'Network Error: Cannot connect to server.'
-      } else if (error.response?.status) {
-        errorMessage = `Server Error: ${error.response.status} - ${error.response.statusText}`
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
+      } else if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number; statusText?: string; data?: { message?: string } } }
+        if (axiosError.response?.status) {
+          errorMessage = `Server Error: ${axiosError.response.status} - ${axiosError.response.statusText}`
+        } else if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message
+        }
       }
 
       toastError(errorMessage)
@@ -150,7 +153,7 @@ export default function UserLogin() {
       
       <div className="text-center">
         <p className="text-xs text-gray-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <button
             onClick={handleRegisterRedirect}
             className="text-gray-600 hover:text-gray-800 underline"

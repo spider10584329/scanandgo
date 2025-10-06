@@ -1,11 +1,4 @@
-const fs = require('fs');
-const crypto = require('crypto');
-
-// Generate a secure NEXTAUTH_SECRET
-const nextAuthSecret = crypto.randomBytes(32).toString('base64');
-
-// Environment configuration
-const envContent = `# ===========================================
+# ===========================================
 # SCANANDGO - ENVIRONMENT CONFIGURATION
 # ===========================================
 # This file contains all necessary environment variables for the ScanAndGo application
@@ -37,7 +30,7 @@ NEXTAUTH_URL="http://localhost:3000"
 # NEXT-AUTH CONFIGURATION
 # ===========================================
 # NextAuth.js secret key (REQUIRED for production)
-NEXTAUTH_SECRET="${nextAuthSecret}"
+NEXTAUTH_SECRET="qMNz0XN8Mv3iThVE0q2lBL3VviFPydWaSD/oNgpxcZg="
 
 # ===========================================
 # APPLICATION CONFIGURATION
@@ -67,20 +60,3 @@ DEBUG="false"
 
 # Enable database query logging
 PRISMA_DEBUG="false"
-`;
-
-try {
-  fs.writeFileSync('.env.local', envContent);
-  console.log('✅ .env.local file created successfully!');
-  console.log(`🔑 Generated NEXTAUTH_SECRET: ${nextAuthSecret}`);
-  console.log('📝 Database URL: mysql://root@localhost:3306/scanandgo_prod');
-  console.log('');
-  console.log('Next steps:');
-  console.log('1. Run: npm run db:generate');
-  console.log('2. Run: npm run db:test');
-  console.log('3. Run: npm run db:init');
-  console.log('4. Run: npm run dev');
-} catch (error) {
-  console.error('❌ Error creating .env.local file:', error.message);
-  process.exit(1);
-}

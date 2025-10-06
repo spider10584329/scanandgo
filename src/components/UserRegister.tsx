@@ -37,7 +37,7 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
       console.log('All users from API:', allUsers)
       
       // Check if admin email exists in the user list and get their ID
-      const adminUser = allUsers.find((user: any) => 
+      const adminUser = allUsers.find((user: { email?: string; id: number }) => 
         user.email?.toLowerCase() === adminEmail.toLowerCase()
       )
       
@@ -60,7 +60,8 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
           setIsLoading(false)
           return
         }
-      } catch (dbError: any) {
+      } catch (dbError: unknown) {
+        console.error('Username check error:', dbError)
         toastError('Failed to check username availability.')
         setIsLoading(false)
         return
@@ -92,19 +93,22 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
         } else {
           toastError(registrationResponse.data.message || 'Registration failed.')
         }
-      } catch (regError: any) {
+      } catch (regError: unknown) {
         console.error('Registration error:', regError)
         toastError('Failed to register user.')
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('API Error:', error)
       let errorMessage = 'Failed to connect to server'
       
-      if (error.code === 'ERR_NETWORK') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'ERR_NETWORK') {
         errorMessage = 'Network Error: Cannot connect to server.'
-      } else if (error.response?.status) {
-        errorMessage = `Server Error: ${error.response.status} - ${error.response.statusText}`
+      } else if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number; statusText?: string } }
+        if (axiosError.response?.status) {
+          errorMessage = `Server Error: ${axiosError.response.status} - ${axiosError.response.statusText}`
+        }
       }
       
       toastError(errorMessage)

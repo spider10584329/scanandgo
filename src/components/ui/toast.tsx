@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast'
 import React from 'react'
+import Image from 'next/image'
 
 // Toast types with custom colors
 type ToastType = 'success' | 'error' | 'warning' | 'notification'
@@ -7,38 +8,38 @@ type ToastType = 'success' | 'error' | 'warning' | 'notification'
 // Custom SVG icons from public directory
 const ToastIcons = {
   success: (
-    <img 
+    <Image 
       src="/success.svg" 
       alt="Success" 
-      width="20" 
-      height="20" 
+      width={20} 
+      height={20} 
       style={{ filter: 'brightness(0) invert(1)' }} // Makes SVG white
     />
   ),
   error: (
-    <img 
+    <Image 
       src="/error.svg" 
       alt="Error" 
-      width="20" 
-      height="20" 
+      width={20} 
+      height={20} 
       style={{ filter: 'brightness(0) invert(1)' }} // Makes SVG white
     />
   ),
   warning: (
-    <img 
+    <Image 
       src="/warning.svg" 
       alt="Warning" 
-      width="20" 
-      height="20" 
+      width={20} 
+      height={20} 
       style={{ filter: 'brightness(0) invert(1)' }} // Makes SVG white
     />
   ),
   notification: (
-    <img 
+    <Image 
       src="/notification.svg" 
       alt="Notification" 
-      width="20" 
-      height="20" 
+      width={20} 
+      height={20} 
       style={{ filter: 'brightness(0) invert(1)' }} // Makes SVG white
     />
   ),
@@ -79,13 +80,13 @@ export const showToast = ({
   const backgroundColor = colors?.background || defaultColors[type]
   const textColor = colors?.text || 'white'
 
-  const getIcon = (): React.ReactNode | false => {
-    if (hideIcon) return false
-    if (customIcon) return customIcon
+  const getIcon = (): React.ReactElement | undefined => {
+    if (hideIcon) return undefined
+    if (customIcon) return customIcon as React.ReactElement
     return ToastIcons[type]
   }
 
-  const toastOptions = {
+  const baseOptions = {
     duration,
     position,
     style: {
@@ -96,8 +97,12 @@ export const showToast = ({
       fontSize: '14px',
       fontWeight: '500',
     },
-    icon: getIcon() as any, // Type assertion for react-hot-toast compatibility
   }
+
+  const iconElement = getIcon()
+  const toastOptions = iconElement 
+    ? { ...baseOptions, icon: iconElement }
+    : baseOptions
 
   // Use the generic toast function to avoid default icons
   return toast(message, toastOptions)

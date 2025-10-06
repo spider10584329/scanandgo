@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       message: 'Password reset request submitted successfully. Please contact your administrator.',
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Password reset request error:', error)
     return NextResponse.json(
       { error: 'Password reset request failed' },

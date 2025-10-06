@@ -35,7 +35,7 @@ export default function ManagerLogin() {
         toastError('Login failed')
       }
       
-    } catch (error: any) { 
+    } catch (error: unknown) { 
       console.error('Login Error:', error)
       toastError('Failed to connect to server')
     } finally {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import UserLogin from '@/components/UserLogin'
 import ManagerLogin from '@/components/ManagerLogin'
 
@@ -12,9 +13,11 @@ export default function Home() {
       <div className="bg-white border border-gray-300 rounded-2xl p-8 w-96 h-auto">
         {/* Logo */}
         <div className="text-center mb-6">
-          <img 
+          <Image 
             src="/logo.webp" 
             alt="Scanandgo Logo" 
+            width={64}
+            height={64}
             className="mx-auto h-16 w-auto"
           />
         </div>
