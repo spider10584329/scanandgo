@@ -1,39 +1,24 @@
 /**
- * Get the appropriate dashboard URL for a user role
+ * Get the appropriate section URL for navigation
  */
-export function getRoleHomeUrl(role: string): string {
-  switch (role) {
-    case 'admin':
-      return '/admin'
-    case 'manager':
-      return '/manager'
-    case 'agent':
-      return '/agent'
-    case 'user':
-      return '/user'
+export function getSectionUrl(section: string): string {
+  switch (section) {
+    case 'inventory':
+      return '/inventory'
+    case 'items':
+      return '/items'
+    case 'reports':
+      return '/reports'
+    case 'settings':
+      return '/settings'
     default:
-      return '/auth/signin'
-  }
-}
-
-export function getRoleDashboardUrl(role: string): string {
-  switch (role) {
-    case 'admin':
-      return '/admin/dashboard'
-    case 'manager':
-      return '/manager/dashboard'
-    case 'agent':
-      return '/agent/dashboard'
-    case 'user':
-      return '/user/dashboard'
-    default:
-      return '/auth/signin'
+      return '/'
   }
 }
 
 /**
- * Get the default dashboard URL (for general redirects when no role is specified)
+ * Get the default application URL
  */
-export function getDefaultDashboardUrl(): string {
-  return '/dashboard' // This will handle role-based redirection
+export function getDefaultUrl(): string {
+  return '/' // Main application page
 }
