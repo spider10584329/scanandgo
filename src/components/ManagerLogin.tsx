@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { Toaster } from 'react-hot-toast'
 import { toastSuccess, toastError } from './ui/toast'
 
 export default function ManagerLogin() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -15,24 +17,34 @@ export default function ManagerLogin() {
     setIsLoading(true)
     
     try {
-      // Call external pulsepoint API directly for admin authentication
-      const response = await axios.post('https://api.pulsepoint.myrfid.nc/api/user/project/signin', {
-        username: email,
-        password: password,
-        projectId: 7
+      // Call local admin-login API which handles PulsePoint authentication and token generation
+      const response = await axios.post('/api/admin-login', {
+        email,
+        password
       })
       
-      if (response.data.status === 1) {
-        toastSuccess('Login successful!')
+      if (response.data.success && response.data.token) {
+        // Store token in localStorage and cookie
+        try {
+          localStorage.setItem('auth-token', response.data.token)
+        } catch (e) {
+          console.warn('ManagerLogin: Failed to store in localStorage:', e)
+        }
+        
+        document.cookie = `auth-token=${response.data.token}; path=/; max-age=${12 * 60 * 60}; secure; samesite=strict`
+        
+        toastSuccess('Login successful! Redirecting...')
+        
         // Clear form after successful login
         setEmail('')
         setPassword('')
-      } else if (response.data.status === -1) {
-        toastError(response.data.message || 'Account not found')
-      } else if (response.data.status === 0) {
-        toastError(response.data.message || 'Wrong password')
+        
+        // Redirect to admin area
+        setTimeout(() => {
+          router.push('/admin')
+        }, 1500)
       } else {
-        toastError('Login failed')
+        toastError(response.data.message || 'Login failed')
       }
       
     } catch (error: unknown) { 

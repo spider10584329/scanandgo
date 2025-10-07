@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export async function GET() {
   try {
-    const response = await axios.get('https://puksepoint.myrfid.nc/user/allusers', {
+    const response = await axios.get('https://api.pulsepoint.myrfid.nc/api/user/allusers', {
       auth: {
         username: 'admin',
         password: 'admin'

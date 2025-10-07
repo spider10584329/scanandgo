@@ -1,31 +1,47 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 export async function initializeDatabase() {
   try {   
-    console.log('Initializing database tables and basic data...')
-    
     // Test basic connection
     await prisma.$connect()
-    console.log('Database connection successful')
     
     // Test tables access
     try {
-      const inventoryCount = await prisma.inventories.count()
-      console.log(`Inventories table: ${inventoryCount} items found`)
+      await prisma.inventories.count()
     } catch (error) {
-      console.log('Could not access inventories table:', error instanceof Error ? error.message : 'Unknown error')
+      console.error('Could not access inventories table:', error instanceof Error ? error.message : 'Unknown error')
     }
     
     try {
-      const itemCount = await prisma.items.count()
-      console.log(`Items table: ${itemCount} items found`)
+      await prisma.items.count()
     } catch (error) {
-      console.log('Could not access items table:', error instanceof Error ? error.message : 'Unknown error')
+      console.error('Could not access items table:', error instanceof Error ? error.message : 'Unknown error')
     }
-    
-    console.log('Database initialization completed successfully')
+
+    // Create test operator (agent) if doesn't exist
+    try {
+      const existingOperator = await prisma.operators.findFirst({
+        where: { username: 'agent1' }
+      })
+      
+      if (!existingOperator) {
+        const hashedPassword = await bcrypt.hash('password123', 12)
+        
+        await prisma.operators.create({
+          data: {
+            customer_id: 1,
+            username: 'agent1',
+            password: hashedPassword,
+            isActive: 1
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Could not create test operator:', error instanceof Error ? error.message : 'Unknown error')
+    }
   } catch (error) {
     console.error('Database initialization error:', error)
     throw error // Re-throw to let caller handle
@@ -37,29 +53,23 @@ export async function initializeDatabase() {
 // SAFE: Test database connection without modifying anything
 export async function testDatabaseConnection() {
   try {
-    console.log('Testing database connection (read-only)...')
-    
     // Test basic connection
     await prisma.$connect()
-    console.log('Database connection successful')
     
     // Check what tables exist (read-only)
-    const tables = await prisma.$queryRaw`SHOW TABLES`
-    console.log('Available tables:', tables)
+    await prisma.$queryRaw`SHOW TABLES`
     
     // Test main tables access (read-only)
     try {
-      const inventoryCount = await prisma.inventories.count()
-      console.log(`Inventories table: ${inventoryCount} items found`)
+      await prisma.inventories.count()
     } catch (error) {
-      console.log('Could not access inventories table:', error instanceof Error ? error.message : 'Unknown error')
+      console.error('Could not access inventories table:', error instanceof Error ? error.message : 'Unknown error')
     }
     
     try {
-      const itemCount = await prisma.items.count()
-      console.log(`Items table: ${itemCount} items found`)
+      await prisma.items.count()
     } catch (error) {
-      console.log('Could not access items table:', error instanceof Error ? error.message : 'Unknown error')
+      console.error('Could not access items table:', error instanceof Error ? error.message : 'Unknown error')
     }
     
     return true

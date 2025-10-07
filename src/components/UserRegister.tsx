@@ -34,7 +34,6 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
       })
       
       const allUsers = adminCheckResponse.data?.data || adminCheckResponse.data || []
-      console.log('All users from API:', allUsers)
       
       // Check if admin email exists in the user list and get their ID
       const adminUser = allUsers.find((user: { email?: string; id: number }) => 
@@ -46,8 +45,6 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
         setIsLoading(false)
         return
       }
-      
-      console.log('Admin user found:', adminUser)
       const customerId = adminUser.id      
      
       try {
@@ -67,10 +64,7 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
         return
       }
       
-      console.log('Username is available')
-      
       // Step 4: Register the new user in local MariaDB
-      console.log('Step 3: Registering new user...')
       try {
         const registrationResponse = await axios.post('/api/register-user', {
           adminEmail,
@@ -80,13 +74,13 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
         })
         
         if (registrationResponse.data.success) {
-          toastSuccess('Registered correctly.')
+          toastSuccess('Registration successful! Account pending approval.')
           // Clear form after successful registration
           setAdminEmail('')
           setUsername('')
           setPassword('')
           setConfirmPassword('')
-          // Optionally go back to login after a delay
+          // Go back to login after a delay
           setTimeout(() => {
             onBackToLogin()
           }, 2000)

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { generateToken } from '@/lib/jwt'
 
 const prisma = new PrismaClient()
 
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if account is active
-    if (!user.isActive) {
+    if (!user.isActive || user.isActive === 0) {
       return NextResponse.json({
         success: false,
         message: 'Account is not active.'
@@ -38,7 +39,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-
     const passwordMatch = await bcrypt.compare(password, user.password)
    
     if (!passwordMatch) {
@@ -48,10 +48,26 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Generate JWT token with agent role
+    const token = await generateToken({
+      customerId: user.customer_id,
+      userId: user.id,
+      username: user.username,
+      role: 'agent',
+      isActive: user.isActive === 1
+    })
+
     // Login successful - both username and password are correct
     return NextResponse.json({
       success: true,
-      message: 'Login successful'
+      message: 'Login successful',
+      token,
+      user: {
+        customerId: user.customer_id,
+        id: user.id,
+        username: user.username,
+        role: 'agent'
+      }
     })
 
   } catch (error: unknown) {

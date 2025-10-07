@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import UserRegister from './UserRegister'
 import axios from 'axios'
 import { Toaster } from 'react-hot-toast'
 import { toastSuccess, toastError } from './ui/toast'
 
 export default function UserLogin() {
+  const router = useRouter()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showRegister, setShowRegister] = useState(false)
@@ -23,11 +25,26 @@ export default function UserLogin() {
         password
       })
       
-      if (response.data.success) {
-        toastSuccess('Login successful!')
+      if (response.data.success && response.data.token) {
+        // Store token in localStorage and cookie
+        try {
+          localStorage.setItem('auth-token', response.data.token)
+        } catch (e) {
+          console.warn('UserLogin: Failed to store in localStorage:', e)
+        }
+        
+        document.cookie = `auth-token=${response.data.token}; path=/; max-age=${12 * 60 * 60}; secure; samesite=strict`
+        
+        toastSuccess('Login successful! Redirecting...')
+        
         // Clear form after successful login
         setUsername('')
         setPassword('')
+        
+        // Redirect to agent area
+        setTimeout(() => {
+          router.push('/agent')
+        }, 1500)
       } else {
         toastError(response.data.message || 'Login failed. Please check your credentials.')
       }
