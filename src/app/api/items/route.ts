@@ -26,11 +26,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const categoryId = searchParams.get('category_id')
+
+    // Build where clause
+    const whereClause: { customer_id: number; category_id?: number } = {
+      customer_id: decoded.customerId
+    }
+
+    // Add category filter if provided
+    if (categoryId) {
+      whereClause.category_id = parseInt(categoryId)
+    }
+
     // Get items for the customer with category information
     const items = await prisma.items.findMany({
-      where: {
-        customer_id: decoded.customerId
-      },
+      where: whereClause,
       include: {
         categories: {
           select: {
