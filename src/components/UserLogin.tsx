@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import UserRegister from './UserRegister'
 import axios from 'axios'
-import { Toaster } from 'react-hot-toast'
 import { toastSuccess, toastError } from './ui/toast'
 
 export default function UserLogin() {
@@ -179,7 +178,6 @@ export default function UserLogin() {
           </button>
         </p>
       </div>
-       <Toaster />
     </div>
    
   )

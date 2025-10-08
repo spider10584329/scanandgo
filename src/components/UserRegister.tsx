@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import axios from 'axios'
-import { Toaster } from 'react-hot-toast'
 import { toastSuccess, toastError } from './ui/toast'
 interface UserRegisterProps {
   onBackToLogin: () => void
@@ -194,7 +193,6 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
           </button>
         </p>
       </div>
-      <Toaster />
     </div>
   )
 }

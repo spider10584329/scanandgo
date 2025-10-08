@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
-import { Toaster } from 'react-hot-toast'
 import { toastSuccess, toastError } from './ui/toast'
 
 export default function ManagerLogin() {
@@ -102,8 +101,6 @@ export default function ManagerLogin() {
         </button>
       </form>
       
-      {/* Toast notifications container */}
-      <Toaster />
     </div>
   )
 }
