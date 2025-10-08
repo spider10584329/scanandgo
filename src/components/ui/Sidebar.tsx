@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useClientName } from '@/hooks/useClientName'
@@ -123,17 +123,19 @@ const agentMenuItems: MenuItem[] = [
   },
 ]
 
-export default function Sidebar({ role, currentPath }: SidebarProps) {
+const Sidebar = memo(function Sidebar({ role, currentPath }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { clientName } = useClientName()
   
-  const menuItems = role === 'admin' ? adminMenuItems : agentMenuItems
+  // Memoize menu items to prevent recalculation on every render
+  const menuItems = useMemo(() => role === 'admin' ? adminMenuItems : agentMenuItems, [role])
 
-
-
-  const filteredMenuItems = role === 'admin' 
-    ? menuItems 
-    : menuItems.filter(item => item.label !== 'User' && item.label !== 'Snapshot')
+  // Memoize filtered menu items
+  const filteredMenuItems = useMemo(() => {
+    return role === 'admin' 
+      ? menuItems 
+      : menuItems.filter(item => item.label !== 'User' && item.label !== 'Snapshot')
+  }, [role, menuItems])
 
   return (
     <div className={`h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
@@ -176,7 +178,7 @@ export default function Sidebar({ role, currentPath }: SidebarProps) {
               <Link
                 key={item.id}
                 href={item.href}
-                className={`group flex items-center px-2 py-2 mt-3 mb-3 text-sm font-medium rounded-xl transition-all duration-200 border border-[#ffffff] ${
+                className={`group flex items-center px-2 py-2 mt-3 mb-3 text-sm font-medium rounded-xl transition-colors duration-150 border border-[#ffffff] ${
                   isActive
                     ? 'text-[#000000] bg-gray-100 border border-gray-300'
                     : 'text-[#000000] hover:bg-gray-50 hover:text-gray-900 hover:border-gray-200'
@@ -241,4 +243,6 @@ export default function Sidebar({ role, currentPath }: SidebarProps) {
       </div>
     </div>
   )
-}
+})
+
+export default Sidebar

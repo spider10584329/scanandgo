@@ -46,12 +46,15 @@ export function useClientName() {
 
   useEffect(() => {
     fetchClientName()
+  }, [fetchClientName])
+
+  useEffect(() => {
     registerRefreshCallback(refreshClientName)
     
     return () => {
       unregisterRefreshCallback(refreshClientName)
     }
-  }, [fetchClientName, registerRefreshCallback, unregisterRefreshCallback, refreshClientName])
+  }, [registerRefreshCallback, unregisterRefreshCallback, refreshClientName])
 
   return {
     clientName: clientName.toUpperCase(), // Always display in uppercase
