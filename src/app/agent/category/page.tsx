@@ -637,7 +637,7 @@ export default function CategoryPage() {
                     {(selectedCategory 
                       ? items.filter(item => item.category_id === selectedCategory.id)
                       : items
-                    ).map((item, index) => (
+                    ).map((item) => (
                       <tr 
                         key={item.id} 
                         className={`hover:bg-gray-50 transition-colors ${

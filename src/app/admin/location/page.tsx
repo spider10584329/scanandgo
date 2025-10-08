@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toastSuccess, toastError } from '@/components/ui/toast'
 
 // Type definitions
@@ -96,16 +96,9 @@ export default function LocationPage() {
   const [deletingFloorId, setDeletingFloorId] = useState<number | null>(null)
   const [deletingDetailLocationId, setDeletingDetailLocationId] = useState<number | null>(null)
 
-  // Fetch all data on component mount
-  useEffect(() => {
-    fetchBuildings()
-    fetchAreas()
-    fetchFloors()
-    fetchDetailLocations()
-  }, [])
-
   // Generic fetch function
-  const fetchData = async (endpoint: string, setter: Function, errorMessage: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fetchData = async (endpoint: string, setter: (data: any[]) => void, errorMessage: string) => {
     try {
       const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
       
@@ -136,10 +129,18 @@ export default function LocationPage() {
     }
   }
 
-  const fetchBuildings = () => fetchData('buildings', setBuildings, 'Failed to load buildings')
-  const fetchAreas = () => fetchData('areas', setAreas, 'Failed to load areas')
-  const fetchFloors = () => fetchData('floors', setFloors, 'Failed to load floors')
-  const fetchDetailLocations = () => fetchData('detail-locations', setDetailLocations, 'Failed to load detail locations')
+  const fetchBuildings = useCallback(() => fetchData('buildings', setBuildings, 'Failed to load buildings'), [])
+  const fetchAreas = useCallback(() => fetchData('areas', setAreas, 'Failed to load areas'), [])
+  const fetchFloors = useCallback(() => fetchData('floors', setFloors, 'Failed to load floors'), [])
+  const fetchDetailLocations = useCallback(() => fetchData('detail-locations', setDetailLocations, 'Failed to load detail locations'), [])
+
+  // Fetch all data on component mount
+  useEffect(() => {
+    fetchBuildings()
+    fetchAreas()
+    fetchFloors()
+    fetchDetailLocations()
+  }, [fetchBuildings, fetchAreas, fetchFloors, fetchDetailLocations])
 
   // Building operations
   const addBuilding = async () => {
