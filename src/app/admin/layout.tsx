@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import SecurityGuard from '@/components/auth/SecurityGuard'
 import Sidebar from '@/components/ui/Sidebar'
 import Image from 'next/image'
+import { ClientNameProvider } from '@/contexts/ClientNameContext'
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -37,7 +38,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SecurityGuard requiredRole="admin">
-      <div className="flex h-screen bg-gray-50">
+      <ClientNameProvider>
+        <div className="flex h-screen bg-gray-50">
         {/* Sidebar */}
         <Sidebar 
           role="admin"
@@ -87,6 +89,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </main>
         </div>
       </div>
+      </ClientNameProvider>
     </SecurityGuard>
   )
 }

@@ -14,11 +14,15 @@ interface Item {
   category_id: number | null
   name: string
   barcode: string | null
+  categories?: {
+    id: number
+    name: string
+  } | null
 }
 
 export default function CategoryPage() {
   const [categories, setCategories] = useState<Category[]>([])
-  const [items] = useState<Item[]>([])
+  const [items, setItems] = useState<Item[]>([])
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   
   
@@ -28,13 +32,19 @@ export default function CategoryPage() {
   const [newItemBarcode, setNewItemBarcode] = useState('')
 
   const [isAdding, setIsAdding] = useState(false)
+  const [isAddingItem, setIsAddingItem] = useState(false)
   const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null)
+  const [deletingItemId, setDeletingItemId] = useState<number | null>(null)
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null)
   const [editingCategoryName, setEditingCategoryName] = useState('')
+  const [editingItemId, setEditingItemId] = useState<number | null>(null)
+  const [editingItemName, setEditingItemName] = useState('')
+  const [editingItemBarcode, setEditingItemBarcode] = useState('')
 
-  // Fetch categories on component mount
+  // Fetch categories and items on component mount
   useEffect(() => {
     fetchCategories()
+    fetchItems()
   }, [])
 
   const fetchCategories = async () => {
@@ -63,6 +73,35 @@ export default function CategoryPage() {
     } catch (error) {
       console.error('Error fetching categories:', error)
       toastError('Failed to load categories')
+    }
+  }
+
+  const fetchItems = async () => {
+    try {
+      const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
+      
+      if (!token) {
+        toastError('No authentication token found')
+        return
+      }
+
+      const response = await fetch('/api/items', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setItems(data.items)
+      } else {
+        toastError(data.error || 'Failed to fetch items')
+      }
+    } catch (error) {
+      console.error('Error fetching items:', error)
+      toastError('Failed to load items')
     }
   }
 
@@ -193,6 +232,13 @@ export default function CategoryPage() {
             : cat
         ))
         
+        // Update items list to reflect the new category name
+        setItems(prev => prev.map(item => 
+          item.category_id === editingCategoryId && item.categories
+            ? { ...item, categories: { ...item.categories, name: data.category.name } }
+            : item
+        ))
+        
         // Update selected category if it was the edited one
         if (selectedCategory?.id === editingCategoryId) {
           setSelectedCategory(prev => prev ? { ...prev, name: data.category.name } : null)
@@ -219,6 +265,155 @@ export default function CategoryPage() {
   const handleCancelEdit = () => {
     setEditingCategoryId(null)
     setEditingCategoryName('')
+  }
+
+  const handleAddItem = async () => {
+    if (!selectedCategory) {
+      toastError('Please select a category first')
+      return
+    }
+
+    if (!newItemName.trim()) {
+      toastError('Please enter an item name')
+      return
+    }
+
+    setIsAddingItem(true)
+    try {
+      const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
+     
+      const response = await fetch('/api/items', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: newItemName.trim(),
+          barcode: newItemBarcode.trim() || null,
+          category_id: selectedCategory.id
+        })
+      })
+
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        // Add new item to the list
+        setItems(prev => [...prev, data.item])
+        setNewItemName('')
+        setNewItemBarcode('')
+        toastSuccess(`Item "${data.item.name}" added successfully!`)
+      } else {
+        // Handle specific error messages, especially duplicates     
+        if (response.status === 409) {     
+          toastError(`Item "${newItemName.trim()}" already exists in this category!`)
+        } else {
+           toastError(data.error || 'Failed to add item')
+        }
+      }
+    } catch {      
+      toastError('Failed to add item')
+    } finally {
+      setIsAddingItem(false)
+    }
+  }
+
+  const handleDeleteItem = async (itemId: number, itemName: string) => {
+    if (!confirm(`Are you sure you want to delete the item "${itemName}"? This action cannot be undone.`)) {
+      return
+    }
+    setDeletingItemId(itemId)
+    try {
+      const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
+        
+      const response = await fetch('/api/items', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: itemId
+        })
+      })
+
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        // Remove item from the list
+        setItems(prev => prev.filter(item => item.id !== itemId))
+        toastSuccess(`Item "${itemName}" deleted successfully!`)
+      } else {
+        toastError(data.error || 'Failed to delete item')
+      }
+    } catch {    
+      toastError('Failed to delete item')
+    } finally {
+      setDeletingItemId(null)
+    }
+  }
+
+  const handleEditItem = (item: Item) => {
+    setEditingItemId(item.id)
+    setEditingItemName(item.name)
+    setEditingItemBarcode(item.barcode || '')
+  }
+
+  const handleSaveEditItem = async () => {
+    if (!editingItemName.trim()) {
+      toastError('Please enter an item name')
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
+        
+      const response = await fetch('/api/items', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: editingItemId,
+          name: editingItemName.trim(),
+          barcode: editingItemBarcode.trim() || null
+        })
+      })
+
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        // Update item in the list
+        setItems(prev => prev.map(item => 
+          item.id === editingItemId 
+            ? { ...item, name: data.item.name, barcode: data.item.barcode }
+            : item
+        ))
+        
+        // Reset edit state
+        setEditingItemId(null)
+        setEditingItemName('')
+        setEditingItemBarcode('')
+        
+        toastSuccess(`Item updated successfully!`)
+      } else {
+        // Handle specific error messages, especially duplicates
+        if (response.status === 409) {
+          toastError(`Item "${editingItemName.trim()}" already exists in this category!`)
+        } else {
+          toastError(data.error || 'Failed to update item')
+        }
+      }
+    } catch {    
+      toastError('Failed to update item')
+    }
+  }
+
+  const handleCancelEditItem = () => {
+    setEditingItemId(null)
+    setEditingItemName('')
+    setEditingItemBarcode('')
   }
 
   return (
@@ -252,7 +447,7 @@ export default function CategoryPage() {
                 placeholder="New category name"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
-                className="flex-1 px-3 py-2 text-sm border border-gray-400 rounded-md focus:outline-none "
+                className="flex-1 px-3 py-2 text-sm border border-gray-400 rounded-md bg-[#ffffff] focus:outline-none "
               />
               <button 
                 onClick={handleAddCategory}
@@ -270,12 +465,12 @@ export default function CategoryPage() {
               {categories.map((category) => (
                 <div
                   key={category.id}
-                  className={`p-3 border rounded-lg border-gray-200 transition-colors ${
+                  className={`p-3 border rounded-lg transition-colors ${
                     editingCategoryId === category.id
                       ? 'bg-blue-50 border-blue-300'
                       : selectedCategory?.id === category.id
-                      ? 'text-[#000000] bg-gray-100 border-gray-400 cursor-pointer'
-                      : 'text-[#000000] hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 cursor-pointer'
+                      ? 'bg-blue-50 border-blue-300'
+                      : 'border-gray-200 hover:bg-gray-50'
                   }`}
                   onClick={() => editingCategoryId !== category.id && setSelectedCategory(category)}
                 >
@@ -319,7 +514,7 @@ export default function CategoryPage() {
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-gray-900">{category.name}</span>
                       <div className="flex gap-1">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-500 border border-blue-100">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-500 border border-green-300">
                           {items.filter(item => item.category_id === category.id).length} items
                         </span>
                         <button 
@@ -377,74 +572,168 @@ export default function CategoryPage() {
           {/* Add Item Form */}
           {selectedCategory && (
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <div className="space-y-2">
+              <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Item name"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-[#ffffff] focus:outline-none "
                 />
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Barcode (optional)"
-                    value={newItemBarcode}
-                    onChange={(e) => setNewItemBarcode(e.target.value)}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                  <button className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                    Add Item
-                  </button>
-                </div>
+                <input
+                  type="text"
+                  placeholder="Barcode (optional)"
+                  value={newItemBarcode}
+                  onChange={(e) => setNewItemBarcode(e.target.value)}
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-[#ffffff]  focus:outline-none "
+                />
+                <button 
+                  onClick={handleAddItem}
+                  disabled={isAddingItem}
+                  className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none  disabled:cursor-not-allowed"
+                >
+                  {isAddingItem ? 'Adding...' : 'Add Item'}
+                </button>
               </div>
             </div>
           )}
           
           {/* Items List */}
           <div className="flex-1 overflow-y-auto">
-            {!selectedCategory ? (
-              <div className="flex items-center justify-center h-full text-gray-500">
+            {(selectedCategory 
+              ? items.filter(item => item.category_id === selectedCategory.id)
+              : items
+            ).length === 0 ? (
+              <div className="flex items-center justify-center h-32 text-gray-500">
                 <div className="text-center">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a1 1 0 011-1h4a1 1 0 011 1v2M7 7h10" />
+                  <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-6a2 2 0 00-2 2v3a2 2 0 002 2h6m-16 0h6a2 2 0 002-2v-3a2 2 0 00-2-2H4z" />
                   </svg>
-                  <p className="mt-2 text-sm">Select a category to view items</p>
+                  <p className="mt-2 text-sm">
+                    {selectedCategory ? 'No items in this category' : 'No items found'}
+                  </p>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2">
-                {items
-                  .filter(item => item.category_id === selectedCategory.id)
-                  .map((item) => (
-                    <div
-                      key={item.id}
-                      className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <span className="font-medium text-gray-900">{item.name}</span>
-                          {item.barcode && (
-                            <div className="text-sm text-gray-500 mt-1">
-                              Barcode: {item.barcode}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          <button className="p-1 text-gray-400 hover:text-blue-600">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button className="p-1 text-gray-400 hover:text-red-600">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Item Name
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Barcode
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {(selectedCategory 
+                      ? items.filter(item => item.category_id === selectedCategory.id)
+                      : items
+                    ).map((item, index) => (
+                      <tr 
+                        key={item.id} 
+                        className={`hover:bg-gray-50 transition-colors ${
+                          editingItemId === item.id ? 'bg-gray-50' : 'bg-white' 
+                        }`}
+                      >
+                        {editingItemId === item.id ? (
+                          // Edit mode - inline editing in table
+                          <>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-600 font-medium">
+                              {item.categories?.name || 'Uncategorized'}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <input
+                                type="text"
+                                value={editingItemName}
+                                onChange={(e) => setEditingItemName(e.target.value)}
+                                className="w-full px-2 py-1 text-sm border border-gray-400 rounded focus:outline-none "
+                                autoFocus
+                              />
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <input
+                                type="text"
+                                value={editingItemBarcode}
+                                onChange={(e) => setEditingItemBarcode(e.target.value)}
+                                placeholder="Optional"
+                                className="w-full px-2 py-1 text-sm border border-gray-400 rounded focus:outline-none "
+                              />
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
+                              <div className="flex gap-1 justify-end">
+                                <button
+                                  onClick={handleSaveEditItem}
+                                  className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                  title="Save changes"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={handleCancelEditItem}
+                                  className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                                  title="Cancel editing"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        ) : (
+                          // Normal mode - display data
+                          <>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-600 font-medium">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-500 border border-blue-100">
+                                {item.categories?.name || 'Uncategorized'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
+                              {item.name}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                              {item.barcode || 'No barcode'}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
+                              <div className="flex gap-1 justify-end">
+                                <button 
+                                  onClick={() => handleEditItem(item)}
+                                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                  title="Edit item"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteItem(item.id, item.name)}
+                                  disabled={deletingItemId === item.id}
+                                  className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  title="Delete item"
+                                >
+                                  {deletingItemId === item.id ? (
+                                    <div className="w-4 h-4 animate-spin rounded-full border-2 border-gray-300 border-t-red-600"></div>
+                                  ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  )}
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

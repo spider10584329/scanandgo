@@ -43,13 +43,13 @@ export default function UserPane() {
         
           <div className="flex items-center justify-between">            
             <span className="inline-flex items-center px-5 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-[#029b68]">
-               {getDisplayCount(userCounts?.normal)}
+               Normal : {getDisplayCount(userCounts?.normal)}
             </span>
             <span className="inline-flex items-center px-5 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700 border border-red-200">
-               {getDisplayCount(userCounts?.forgottenPassword)}
+               Forgot Password : {getDisplayCount(userCounts?.forgottenPassword)}
             </span>
              <span className="inline-flex items-center px-5 py-1 rounded-full text-sm font-medium bg-[#d9e0e6] text-grey-700 border border-[#a8b1b8]">
-               {getDisplayCount(userCounts?.inactive)}
+               Inactive : {getDisplayCount(userCounts?.inactive)}
             </span>
           </div>
               

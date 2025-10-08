@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import SecurityGuard from '@/components/auth/SecurityGuard'
 import Sidebar from '@/components/ui/Sidebar'
 import Image from 'next/image'
+import { ClientNameProvider } from '@/contexts/ClientNameContext'
 
 interface AgentLayoutProps {
   children: ReactNode
@@ -37,7 +38,8 @@ export default function AgentLayout({ children }: AgentLayoutProps) {
 
   return (
     <SecurityGuard requiredRole="agent">
-      <div className="flex h-screen bg-gray-50">
+      <ClientNameProvider>
+        <div className="flex h-screen bg-gray-50">
         {/* Sidebar */}
         <Sidebar 
           role="agent"
@@ -87,6 +89,7 @@ export default function AgentLayout({ children }: AgentLayoutProps) {
           </main>
         </div>
       </div>
+      </ClientNameProvider>
     </SecurityGuard>
   )
 }

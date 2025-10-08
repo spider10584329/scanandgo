@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useClientName } from '@/hooks/useClientName'
 
 interface SidebarProps {
   role: 'admin' | 'agent'
@@ -124,6 +125,7 @@ const agentMenuItems: MenuItem[] = [
 
 export default function Sidebar({ role, currentPath }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { clientName } = useClientName()
   
   const menuItems = role === 'admin' ? adminMenuItems : agentMenuItems
 
@@ -151,7 +153,7 @@ export default function Sidebar({ role, currentPath }: SidebarProps) {
           </div>
           {!isCollapsed && (
             <div>
-              <span className="font-bold text-gray-900 text-lg">RFID Hotel</span>
+              <span className="font-bold text-gray-900 text-lg">{clientName}</span>
             </div>
           )}
         </div>
@@ -212,6 +214,31 @@ export default function Sidebar({ role, currentPath }: SidebarProps) {
         </div>
 
       </nav>
+
+      {/* Developer Logo at Bottom */}
+      <div className="border-t border-gray-200 p-4">
+        <div className="flex items-center justify-center">
+          {!isCollapsed ? (
+            <div className="flex items-center space-x-2">
+              <Image 
+                src="/clinotag.png" 
+                alt="Clinotag" 
+                width={80}
+                height={80}                
+              />
+              
+            </div>
+          ) : (
+            <Image 
+              src="/clinotag.png" 
+              alt="Clinotag" 
+              width={28}
+              height={28}             
+              title="Powered by Clinotag"
+            />
+          )}
+        </div>
+      </div>
     </div>
   )
 }
