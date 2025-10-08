@@ -70,7 +70,10 @@ export default function InventoryPage() {
             </div>
 
             {/* Items List */}
-            <ItemsList selectedCategory={selectedCategory} />
+            <ItemsList 
+              selectedCategory={selectedCategory}
+              onDragStart={(items) => console.log('Dragging items:', items)}
+            />
           </div>
         </div>
 
@@ -119,6 +122,7 @@ export default function InventoryPage() {
               selectedArea={selectedArea}
               selectedFloor={selectedFloor}
               selectedDetailLocation={selectedDetailLocation}
+              onItemsAdded={() => console.log('Items successfully added to inventory')}
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { toastSuccess, toastError } from '@/components/ui/toast'
 
 interface InventoryItem {
   id: number
@@ -40,18 +41,23 @@ interface InventoryTableProps {
   selectedArea: LocationData | null
   selectedFloor: LocationData | null
   selectedDetailLocation: LocationData | null
+  onItemsAdded?: () => void
 }
 
 export default function InventoryTable({ 
   selectedBuilding, 
   selectedArea, 
   selectedFloor, 
-  selectedDetailLocation 
+  selectedDetailLocation,
+  onItemsAdded
 }: InventoryTableProps) {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [dragCounter, setDragCounter] = useState(0)
 
   const fetchInventoryItems = useCallback(async () => {
     try {
@@ -103,6 +109,127 @@ export default function InventoryTable({
     setIsModalOpen(true)
   }
 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    // Check if at least one location filter is selected
+    const hasLocationFilter = selectedBuilding || selectedArea || selectedFloor || selectedDetailLocation
+    
+    if (hasLocationFilter) {
+      e.dataTransfer.dropEffect = 'copy'
+      if (!isDragOver) {
+        setIsDragOver(true)
+      }
+    } else {
+      e.dataTransfer.dropEffect = 'none'
+      if (!isDragOver) {
+        setIsDragOver(true)
+      }
+    }
+  }
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragCounter(prev => prev + 1)
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragCounter(prev => {
+      const newCounter = prev - 1
+      if (newCounter === 0) {
+        setIsDragOver(false)
+      }
+      return newCounter
+    })
+  }
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    setDragCounter(0)
+    
+    // Validate that at least one location filter is selected
+    const hasLocationFilter = selectedBuilding || selectedArea || selectedFloor || selectedDetailLocation
+    if (!hasLocationFilter) {
+      toastError('Please select at least one location filter (Building, Area, Floor, or Detail Location) before adding items to inventory.')
+      return
+    }
+    
+    setIsProcessing(true)
+
+    try {
+      const droppedItemsData = e.dataTransfer.getData('application/json')
+      const droppedItems = JSON.parse(droppedItemsData)
+
+      if (!droppedItems || !Array.isArray(droppedItems) || droppedItems.length === 0) {
+        console.error('No valid items to drop')
+        return
+      }
+
+      // Prepare location data
+      const locationData = {
+        buildingId: selectedBuilding?.id || null,
+        areaId: selectedArea?.id || null,
+        floorId: selectedFloor?.id || null,
+        detailLocationId: selectedDetailLocation?.id || null
+      }
+
+      // Get authentication token
+      const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
+      
+      if (!token) {
+        console.error('No authentication token found')
+        return
+      }
+
+      // Create inventory records
+      const response = await fetch('/api/inventories', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          items: droppedItems.map((item: { id: number; name: string; barcode?: string; category_id?: number }) => ({
+            id: item.id,
+            category_id: item.category_id
+          })),
+          locationData
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        // Refresh the inventory table
+        await fetchInventoryItems()
+        
+        // Notify parent component
+        onItemsAdded?.()
+        
+        // Show success message
+        toastSuccess(`Successfully added ${result.createdCount} items to inventory!`)
+      } else {
+        toastError('Failed to create inventory records: ' + result.error)
+      }
+
+    } catch (error) {
+      console.error('Error processing drop:', error)
+      toastError('An error occurred while processing the drop operation')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   const closeModal = () => {
     setIsModalOpen(false)
     setSelectedItem(null)
@@ -143,32 +270,48 @@ export default function InventoryTable({
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow h-[calc(100vh-370px)] ">
+      <div 
+        className={`bg-white rounded-lg shadow h-[calc(100vh-370px)] relative ${
+          isDragOver 
+            ? 'border-2 border-dashed border-gray-300' 
+            : ''
+        } ${isProcessing ? 'opacity-75' : ''}`}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <div className="px-6 py-4  border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Inventory Items</h2>
         </div>
 
         {inventoryItems.length > 0 ? (
-          <div className="border border-gray-200 rounded-lg overflow-hidden mx-6 mb-6">
-            <table className="min-w-full ">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                    Item Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                    Barcode
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                {inventoryItems.map((item) => (
+          <div className="flex flex-col h-[calc(100vh-450px)] mx-6 mb-6">
+            <div className="border border-gray-200 rounded-lg overflow-hidden flex flex-col h-full">
+              <div className="flex-shrink-0">
+                <table className="min-w-full">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        Category
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        Item Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        Barcode
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div className="flex-1 overflow-y-scroll">
+                <table className="min-w-full">
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {inventoryItems.map((item) => (
                   <tr 
                     key={item.id} 
                     className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150"
@@ -206,9 +349,11 @@ export default function InventoryTable({
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="text-center py-12">
@@ -219,6 +364,29 @@ export default function InventoryTable({
             <p className="text-sm text-gray-500">
               No items match your current location filters.
             </p>
+          </div>
+        )}
+
+        {/* Drag overlay */}
+        {isDragOver && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="text-center bg-white bg-opacity-90 rounded-lg p-4 shadow-lg ">
+              {selectedBuilding || selectedArea || selectedFloor || selectedDetailLocation ? (
+                <>
+                  <svg className="mx-auto h-6 w-6 text-green-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  </svg>
+                  <p className="text-sm font-medium text-green-700">Drop items here</p>
+                </>
+              ) : (
+                <>                  
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16" className="mx-auto mb-1">
+                    <path fill="#ad0d0dff" d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0Z"/>
+                  </svg>
+                  <p className="text-sm font-medium text-red-700">Select location filters first</p>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
