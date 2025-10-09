@@ -50,7 +50,9 @@ export default function LocationSelect({
   const [locations, setLocations] = useState<LocationData[]>([])
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState<'down' | 'up'>('down')
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const config = locationConfig[type]
   const displayPlaceholder = placeholder || `Select ${config.label}`
@@ -125,6 +127,35 @@ export default function LocationSelect({
     setIsDropdownOpen(false)
   }
 
+  const calculateDropdownPosition = () => {
+    if (!buttonRef.current) return 'down'
+    
+    const buttonRect = buttonRef.current.getBoundingClientRect()
+    const viewportHeight = window.innerHeight
+    const dropdownHeight = 200 // Approximate max height of dropdown (max-h-48 ≈ 192px + padding)
+    
+    // Check if there's enough space below
+    const spaceBelow = viewportHeight - buttonRect.bottom
+    const spaceAbove = buttonRect.top
+    
+    // If not enough space below but enough space above, position upward
+    if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+      return 'up'
+    }
+    
+    return 'down'
+  }
+
+  const handleDropdownToggle = () => {
+    if (!shouldBeDisabled) {
+      if (!isDropdownOpen) {
+        const position = calculateDropdownPosition()
+        setDropdownPosition(position)
+      }
+      setIsDropdownOpen(!isDropdownOpen)
+    }
+  }
+
   const shouldBeDisabled = disabled || (type !== 'building' && !parentId)
 
   return (
@@ -134,8 +165,9 @@ export default function LocationSelect({
       </label>
       
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => !shouldBeDisabled && setIsDropdownOpen(!isDropdownOpen)}
+        onClick={handleDropdownToggle}
         disabled={shouldBeDisabled}
         className={`
           relative w-full bg-white border border-gray-400 rounded-sm  px-4 py-2 text-left cursor-pointer text-sm
@@ -163,7 +195,9 @@ export default function LocationSelect({
       </button>
 
       {isDropdownOpen && !shouldBeDisabled && (
-        <div className="absolute z-40 mt-1 w-full bg-white shadow-lg rounded-lg border border-gray-300 overflow-hidden">
+        <div className={`absolute z-40 w-full bg-white shadow-lg rounded-lg border border-gray-300 overflow-hidden ${
+          dropdownPosition === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
+        }`}>
           <div className="max-h-48 overflow-y-auto  p-2">
             {/* Clear Selection Option */}
             <button

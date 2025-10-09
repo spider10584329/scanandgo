@@ -26,12 +26,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get query parameters for location filtering
+    // Get query parameters for location filtering and barcode search
     const { searchParams } = new URL(request.url)
     const buildingId = searchParams.get('building_id')
     const areaId = searchParams.get('area_id')
     const floorId = searchParams.get('floor_id')
     const detailLocationId = searchParams.get('detail_location_id')
+    const barcodeSearch = searchParams.get('barcode_search')
 
     // Build where clause
     const whereClause: { 
@@ -39,7 +40,11 @@ export async function GET(request: NextRequest) {
       building_id?: number; 
       area_id?: number; 
       floor_id?: number; 
-      detail_location_id?: number 
+      detail_location_id?: number;
+      OR?: Array<{
+        barcode?: { contains: string };
+        items?: { barcode?: { contains: string } };
+      }>;
     } = {
       customer_id: decoded.customerId
     }
@@ -55,6 +60,24 @@ export async function GET(request: NextRequest) {
     }
     if (detailLocationId) {
       whereClause.detail_location_id = parseInt(detailLocationId)
+    }
+
+    // Add barcode search if provided
+    if (barcodeSearch && barcodeSearch.trim()) {
+      whereClause.OR = [
+        {
+          barcode: {
+            contains: barcodeSearch.trim()
+          }
+        },
+        {
+          items: {
+            barcode: {
+              contains: barcodeSearch.trim()
+            }
+          }
+        }
+      ]
     }
 
     // Get inventory items for the customer
