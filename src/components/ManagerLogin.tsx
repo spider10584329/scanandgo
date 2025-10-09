@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { toastSuccess, toastError } from './ui/toast'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function ManagerLogin() {
   const router = useRouter()
+  const { login } = useAuthContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -23,25 +25,22 @@ export default function ManagerLogin() {
       })
       
       if (response.data.success && response.data.token) {
-        // Store token in localStorage and cookie
-        try {
-          localStorage.setItem('auth-token', response.data.token)
-        } catch (e) {
-          console.warn('ManagerLogin: Failed to store in localStorage:', e)
+        const loginSuccess = await login(response.data.token)
+        
+        if (loginSuccess) {
+          toastSuccess('Login successful! Redirecting...')
+          
+          // Clear form after successful login
+          setEmail('')
+          setPassword('')
+          
+          // Redirect to admin area
+          setTimeout(() => {
+            router.push('/admin')
+          }, 1500)
+        } else {
+          toastError('Login validation failed. Please try again.')
         }
-        
-        document.cookie = `auth-token=${response.data.token}; path=/; max-age=${12 * 60 * 60}; secure; samesite=strict`
-        
-        toastSuccess('Login successful! Redirecting...')
-        
-        // Clear form after successful login
-        setEmail('')
-        setPassword('')
-        
-        // Redirect to admin area
-        setTimeout(() => {
-          router.push('/admin')
-        }, 1500)
       } else {
         toastError(response.data.message || 'Login failed')
       }

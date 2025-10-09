@@ -22,7 +22,8 @@ export async function POST(request: Request) {
         username: payload.username,
         email: payload.email,
         role: payload.role,
-        isActive: payload.isActive
+        isActive: payload.isActive,
+        customerId: payload.customerId
       }
     })
   } catch (error) {

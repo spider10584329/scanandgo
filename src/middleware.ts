@@ -29,7 +29,15 @@ export async function middleware(request: NextRequest) {
       
       // Clear any existing auth cookie and redirect
       const redirectResponse = NextResponse.redirect(new URL('/', request.url))
-      redirectResponse.cookies.delete('auth-token')
+      redirectResponse.cookies.set('auth-token', '', {
+        expires: new Date(0),
+        path: '/',
+        secure: true,
+        sameSite: 'strict'
+      })
+      
+      // Add header to indicate session cleanup needed
+      redirectResponse.headers.set('x-session-cleanup', 'true')
       return redirectResponse
     }
 

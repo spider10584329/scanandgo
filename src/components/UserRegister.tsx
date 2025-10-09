@@ -1,18 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { toastSuccess, toastError } from './ui/toast'
+import { useAuthContext } from '@/contexts/AuthContext'
+
 interface UserRegisterProps {
   onBackToLogin: () => void
 }
 
 export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
+  const { clearStaleTokens } = useAuthContext()
   const [adminEmail, setAdminEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // Clear any stale tokens when starting registration
+  useEffect(() => {
+    clearStaleTokens()
+  }, [clearStaleTokens])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

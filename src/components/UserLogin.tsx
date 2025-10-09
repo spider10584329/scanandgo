@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import UserRegister from './UserRegister'
 import axios from 'axios'
 import { toastSuccess, toastError } from './ui/toast'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function UserLogin() {
   const router = useRouter()
+  const { login } = useAuthContext()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showRegister, setShowRegister] = useState(false)
@@ -25,25 +27,22 @@ export default function UserLogin() {
       })
       
       if (response.data.success && response.data.token) {
-        // Store token in localStorage and cookie
-        try {
-          localStorage.setItem('auth-token', response.data.token)
-        } catch (e) {
-          console.warn('UserLogin: Failed to store in localStorage:', e)
+        const loginSuccess = await login(response.data.token)
+        
+        if (loginSuccess) {
+          toastSuccess('Login successful! Redirecting...')
+          
+          // Clear form after successful login
+          setUsername('')
+          setPassword('')
+          
+          // Redirect to agent area
+          setTimeout(() => {
+            router.push('/agent')
+          }, 1500)
+        } else {
+          toastError('Login validation failed. Please try again.')
         }
-        
-        document.cookie = `auth-token=${response.data.token}; path=/; max-age=${12 * 60 * 60}; secure; samesite=strict`
-        
-        toastSuccess('Login successful! Redirecting...')
-        
-        // Clear form after successful login
-        setUsername('')
-        setPassword('')
-        
-        // Redirect to agent area
-        setTimeout(() => {
-          router.push('/agent')
-        }, 1500)
       } else {
         toastError(response.data.message || 'Login failed. Please check your credentials.')
       }

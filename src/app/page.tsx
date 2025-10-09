@@ -1,12 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import UserLogin from '@/components/UserLogin'
 import ManagerLogin from '@/components/ManagerLogin'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('user')
+  const { clearStaleTokens } = useAuthContext()
+
+  // Clear any stale tokens when landing on home page
+  useEffect(() => {
+    clearStaleTokens()
+  }, [clearStaleTokens])
 
   return (
     <div className="min-h-screen bg-gray-400 flex items-center justify-center p-8">

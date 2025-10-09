@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         username: username,
         password: hashedPassword,
         isPasswordRequest: 0, // Set as not a password request by default
-        isActive: 0, // Set as active by default
+        isActive: 1, // Set as active by default
       }
     })
 

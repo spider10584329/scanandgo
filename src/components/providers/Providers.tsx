@@ -1,6 +1,8 @@
 'use client'
 
 import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from '@/contexts/AuthContext'
+import SessionManager from '@/components/auth/SessionManager'
 
 export default function Providers({
   children,
@@ -8,7 +10,8 @@ export default function Providers({
   children: React.ReactNode
 }) {
   return (
-    <>
+    <AuthProvider>
+      <SessionManager />
       {children}
       <Toaster
         position="bottom-right"
@@ -24,6 +27,6 @@ export default function Providers({
           },
         }}
       />
-    </>
+    </AuthProvider>
   )
 }
