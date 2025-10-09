@@ -160,6 +160,24 @@ export async function POST(request: NextRequest) {
     // Get current date for records
     const currentDate = new Date().toISOString().split('T')[0]
 
+    // First, get the item details including barcodes
+    const itemIds = items.map((item: { id: number; category_id?: number }) => item.id)
+    const itemsWithBarcodes = await prisma.items.findMany({
+      where: {
+        id: { in: itemIds },
+        customer_id: decoded.customerId
+      },
+      select: {
+        id: true,
+        barcode: true
+      }
+    })
+
+    // Create a map for quick barcode lookup
+    const barcodeMap = new Map(
+      itemsWithBarcodes.map(item => [item.id, item.barcode])
+    )
+
     // Create inventory records for each item
     const inventoryRecords = items.map((item: { id: number; category_id?: number }) => ({
       customer_id: decoded.customerId,
@@ -169,6 +187,7 @@ export async function POST(request: NextRequest) {
       area_id: locationData?.areaId || null,
       floor_id: locationData?.floorId || null,
       detail_location_id: locationData?.detailLocationId || null,
+      barcode: barcodeMap.get(item.id) || null, // Automatically set barcode from item
       reg_date: currentDate,
       inv_date: currentDate,
       status: 1, // Default active status

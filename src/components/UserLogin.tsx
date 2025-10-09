@@ -36,10 +36,10 @@ export default function UserLogin() {
           setUsername('')
           setPassword('')
           
-          // Redirect to agent area
+          // Redirect to agent dashboard directly
           setTimeout(() => {
-            router.push('/agent')
-          }, 1500)
+            router.push('/agent/dashboard')
+          }, 1000)
         } else {
           toastError('Login validation failed. Please try again.')
         }

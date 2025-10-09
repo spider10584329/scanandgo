@@ -34,24 +34,50 @@ export default function ItemsList({ selectedCategory, onDragStart }: ItemsListPr
         return
       }
 
+      // Fetch all items
       const url = selectedCategory 
         ? `/api/items?category_id=${selectedCategory.id}`
         : '/api/items'
 
-      const response = await fetch(url, {
+      const itemsResponse = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      if (!itemsResponse.ok) {
+        throw new Error(`HTTP error! status: ${itemsResponse.status}`)
       }
 
-      const data = await response.json()
-      if (data.success && data.items) {
-        setItems(data.items)
+      const itemsData = await itemsResponse.json()
+      
+      // Fetch inventory items to get registered barcodes
+      const inventoryResponse = await fetch('/api/inventories', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      let registeredBarcodes = new Set<string>()
+      if (inventoryResponse.ok) {
+        const inventoryData = await inventoryResponse.json()
+        if (inventoryData.success && inventoryData.inventories) {
+          registeredBarcodes = new Set(
+            inventoryData.inventories
+              .map((inv: any) => inv.barcode)
+              .filter((barcode: string) => barcode) // Remove null/empty barcodes
+          )
+        }
+      }
+
+      if (itemsData.success && itemsData.items) {
+        // Filter out items that are already registered in inventory
+        const availableItems = itemsData.items.filter((item: Item) => 
+          !item.barcode || !registeredBarcodes.has(item.barcode)
+        )
+        setItems(availableItems)
       }
     } catch (error) {
       console.error('Error fetching items:', error)
@@ -115,7 +141,7 @@ export default function ItemsList({ selectedCategory, onDragStart }: ItemsListPr
     
     // Add items (show up to 3 items, then "and X more")
     const itemsToShow = selectedItemsArray.slice(0, 3)
-    itemsToShow.forEach((item, index) => {
+    itemsToShow.forEach((item) => {
       const itemDiv = document.createElement('div')
       itemDiv.style.display = 'flex'
       itemDiv.style.alignItems = 'center'
@@ -249,11 +275,10 @@ export default function ItemsList({ selectedCategory, onDragStart }: ItemsListPr
         <div className="text-center py-8 text-gray-500">
           <svg className="mx-auto h-8 w-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-          <p className="text-sm">No items found</p>
+          </svg>          
           <p className="text-xs">
             {selectedCategory 
-              ? `No items in category "${selectedCategory.name}"`
+              ? `No items available in category "${selectedCategory.name}"`
               : 'No items available'
             }
           </p>

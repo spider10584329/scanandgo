@@ -22,6 +22,7 @@ export default function InventoryPage() {
   const [selectedArea, setSelectedArea] = useState<LocationData | null>(null)
   const [selectedFloor, setSelectedFloor] = useState<LocationData | null>(null)
   const [selectedDetailLocation, setSelectedDetailLocation] = useState<LocationData | null>(null)
+  const [refreshItemsKey, setRefreshItemsKey] = useState(0)
 
   const handleCategorySelect = (category: Category | null) => {
     setSelectedCategory(category)
@@ -52,6 +53,12 @@ export default function InventoryPage() {
     setSelectedDetailLocation(detailLocation)
   }
 
+  const handleItemsAdded = () => {
+    console.log('Items successfully added to inventory')
+    // Trigger refresh of ItemsList by updating the key
+    setRefreshItemsKey(prev => prev + 1)
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Inventory Management</h1>
@@ -71,6 +78,7 @@ export default function InventoryPage() {
 
             {/* Items List */}
             <ItemsList 
+              key={refreshItemsKey}
               selectedCategory={selectedCategory}
               onDragStart={(items) => console.log('Dragging items:', items)}
             />
@@ -122,7 +130,7 @@ export default function InventoryPage() {
               selectedArea={selectedArea}
               selectedFloor={selectedFloor}
               selectedDetailLocation={selectedDetailLocation}
-              onItemsAdded={() => console.log('Items successfully added to inventory')}
+              onItemsAdded={handleItemsAdded}
             />
           </div>
         </div>

@@ -108,6 +108,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!barcode || barcode.trim() === '') {
+      return NextResponse.json(
+        { error: 'Barcode is required', success: false },
+        { status: 400 }
+      )
+    }
+
     if (!category_id) {
       return NextResponse.json(
         { error: 'Category is required', success: false },
@@ -130,18 +137,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if item already exists for this customer and category
-    const existingItem = await prisma.items.findFirst({
+    // Check if barcode already exists for this customer (across all categories)
+    const existingBarcode = await prisma.items.findFirst({
       where: {
         customer_id: decoded.customerId,
-        category_id: parseInt(category_id),
-        name: name.trim()
+        barcode: barcode.trim()
       }
     })
 
-    if (existingItem) {
+    if (existingBarcode) {
       return NextResponse.json(
-        { error: 'Item name already exists in this category', success: false },
+        { error: 'Barcode already exists', success: false },
         { status: 409 }
       )
     }
@@ -152,7 +158,7 @@ export async function POST(request: NextRequest) {
         customer_id: decoded.customerId,
         category_id: parseInt(category_id),
         name: name.trim(),
-        barcode: barcode && barcode.trim() !== '' ? barcode.trim() : null
+        barcode: barcode.trim()
       },
       include: {
         categories: {
@@ -216,6 +222,13 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    if (!barcode || barcode.trim() === '') {
+      return NextResponse.json(
+        { error: 'Barcode is required', success: false },
+        { status: 400 }
+      )
+    }
+
     // Check if item exists and belongs to customer
     const existingItem = await prisma.items.findFirst({
       where: {
@@ -248,19 +261,18 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Check if new name already exists for this customer and category (excluding current item)
-    const duplicateItem = await prisma.items.findFirst({
+    // Check if barcode already exists for this customer (excluding current item)
+    const duplicateBarcode = await prisma.items.findFirst({
       where: {
         customer_id: decoded.customerId,
-        category_id: category_id ? parseInt(category_id) : existingItem.category_id,
-        name: name.trim(),
+        barcode: barcode.trim(),
         id: { not: parseInt(id) }
       }
     })
 
-    if (duplicateItem) {
+    if (duplicateBarcode) {
       return NextResponse.json(
-        { error: 'Item name already exists in this category', success: false },
+        { error: 'Barcode already exists', success: false },
         { status: 409 }
       )
     }
@@ -272,7 +284,7 @@ export async function PUT(request: NextRequest) {
       },
       data: {
         name: name.trim(),
-        barcode: barcode && barcode.trim() !== '' ? barcode.trim() : null,
+        barcode: barcode.trim(),
         ...(category_id && { category_id: parseInt(category_id) })
       },
       include: {

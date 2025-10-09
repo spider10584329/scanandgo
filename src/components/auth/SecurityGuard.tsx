@@ -28,8 +28,7 @@ export default function SecurityGuard({ children, requiredRole, allowedPaths }: 
     // Security checks
     if (!user) {
       setSecurityError('Authentication required')
-      logout()
-      router.push('/')
+      setIsAuthorized(false)
       return
     }
 
@@ -37,14 +36,12 @@ export default function SecurityGuard({ children, requiredRole, allowedPaths }: 
       setSecurityError(`Insufficient permissions: ${user.role} cannot access ${requiredRole} content`)
       console.warn(`Security Alert: User ${user.userId} (${user.role}) attempted to access ${requiredRole} content at ${pathname}`)
       logout()
-      router.push('/')
       return
     }
 
     if (!user.isActive) {
       setSecurityError('Account is inactive')
       logout()
-      router.push('/')
       return
     }
 
@@ -53,7 +50,7 @@ export default function SecurityGuard({ children, requiredRole, allowedPaths }: 
     if (!pathname.startsWith(basePath)) {
       setSecurityError('Invalid path for role')
       console.warn(`Security Alert: Invalid path access attempt by ${user.role} user to ${pathname}`)
-      router.push(`${basePath}/dashboard`)
+      router.replace(`${basePath}/dashboard`)
       return
     }
 
@@ -61,7 +58,7 @@ export default function SecurityGuard({ children, requiredRole, allowedPaths }: 
     if (allowedPaths && !allowedPaths.some(path => pathname.startsWith(path))) {
       setSecurityError('Path not allowed for this user')
       console.warn(`Security Alert: Restricted path access attempt by user ${user.userId} to ${pathname}`)
-      router.push(`${basePath}/dashboard`)
+      router.replace(`${basePath}/dashboard`)
       return
     }
 

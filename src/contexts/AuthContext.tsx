@@ -118,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) {
         console.error(`AuthProvider: Token verification failed with status: ${response.status}`)
+        setIsLoading(false)
         return false
       }
 
@@ -131,6 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document.cookie = `auth-token=${token}; path=/; max-age=${12 * 60 * 60}; secure; samesite=strict`
         
         setUser(data.payload)
+        setIsLoading(false) // Set loading to false before returning success
         console.log('AuthProvider: Login successful!')
         return true
       } else {
@@ -140,13 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           customerId: data.payload?.customerId,
           payload: data.payload
         })
+        setIsLoading(false)
         return false
       }
     } catch (error) {
       console.error('AuthProvider: Login failed:', error)
-      return false
-    } finally {
       setIsLoading(false)
+      return false
     }
   }, [clearAuthData])
 

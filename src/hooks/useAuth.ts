@@ -1,11 +1,20 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/contexts/AuthContext'
 
+interface TokenPayload {
+  userId: number
+  username: string
+  email?: string
+  role: 'admin' | 'agent'
+  isActive: boolean
+  customerId: number
+}
+
 interface UseAuthResult {
-  user: any
+  user: TokenPayload | null
   isLoading: boolean
   logout: () => void
 }
@@ -14,17 +23,18 @@ export const useAuth = (requiredRole?: 'admin' | 'agent', redirectTo: string = '
   const { user, isLoading, logout: contextLogout } = useAuthContext()
   const router = useRouter()
 
-  const logout = () => {
+  const logout = useCallback(() => {
     contextLogout()
     router.push(redirectTo)
-  }
+  }, [contextLogout, router, redirectTo])
 
   useEffect(() => {
     if (isLoading) return
 
     // If no user and we need authentication, redirect
     if (!user) {
-      router.push(redirectTo)
+      console.log(`useAuth: No user found, redirecting to ${redirectTo}`)
+      router.replace(redirectTo)
       return
     }
 
@@ -41,7 +51,9 @@ export const useAuth = (requiredRole?: 'admin' | 'agent', redirectTo: string = '
       logout()
       return
     }
-  }, [user, isLoading, requiredRole, redirectTo, router])
+
+    console.log(`useAuth: User authenticated successfully - ${user.username} (${user.role})`)
+  }, [user, isLoading, requiredRole, redirectTo, router, logout])
 
   return {
     user,

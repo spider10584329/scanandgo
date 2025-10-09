@@ -10,9 +10,16 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('user')
   const { clearStaleTokens } = useAuthContext()
 
-  // Clear any stale tokens when landing on home page
+  // Always clear authentication data when landing on home page for fresh start
   useEffect(() => {
+    // Clear all authentication data to ensure fresh registration/login
+    localStorage.removeItem('auth-token')
+    document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict'
+    
+    // Also clear stale tokens as backup
     clearStaleTokens()
+    
+    console.log('Home: Authentication data cleared for fresh start')
   }, [clearStaleTokens])
 
   return (
