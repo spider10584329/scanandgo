@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/jwt'
 
-// Simple in-memory cache for duplicates (5 minute TTL)
+// Simple in-memory cache for duplicates (1 minute TTL for faster refresh)
 const cache = new Map<string, { data: unknown; timestamp: number }>()
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+const CACHE_TTL = 1 * 60 * 1000 // 1 minute instead of 5
 
 // Clean up expired cache entries periodically
 setInterval(() => {
@@ -14,7 +14,7 @@ setInterval(() => {
       cache.delete(key)
     }
   }
-}, CACHE_TTL) // Clean up every 5 minutes
+}, CACHE_TTL) // Clean up every minute
 
 // GET - Fetch duplicate inventory records (optimized)
 export async function GET(request: NextRequest) {
@@ -32,12 +32,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    // Check cache first
+    // Check for cache bypass header first
+    const bypassCache = request.headers.get('cache-control')?.includes('no-cache') || 
+                       request.headers.get('pragma') === 'no-cache'
+    
+    // Check cache only if not explicitly bypassed
     const cacheKey = `duplicates_${decoded.customerId}`
     const cached = cache.get(cacheKey)
     const now = Date.now()
     
-    if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    if (!bypassCache && cached && (now - cached.timestamp) < CACHE_TTL) {
       return NextResponse.json({
         success: true,
         duplicates: cached.data
@@ -165,6 +169,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       duplicates: duplicateInventories
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     })
 
   } catch (error) {
@@ -179,6 +189,39 @@ export async function GET(request: NextRequest) {
         error: 'Failed to fetch duplicate inventories',
         details: errorMessage
       },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE - Clear cache for duplicates
+export async function DELETE(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'No valid authorization token provided' }, { status: 401 })
+    }
+
+    const token = authHeader.substring(7)
+    const decoded = await verifyToken(token)
+    
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+
+    // Clear cache for this customer
+    const cacheKey = `duplicates_${decoded.customerId}`
+    cache.delete(cacheKey)
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Cache cleared successfully'
+    })
+
+  } catch (error) {
+    console.error('Error clearing cache:', error)
+    return NextResponse.json(
+      { error: 'Failed to clear cache' },
       { status: 500 }
     )
   }

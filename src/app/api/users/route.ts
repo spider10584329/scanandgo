@@ -1,32 +1,54 @@
-import { NextResponse } from 'next/server'
-import axios from 'axios'
+import { NextRequest, NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client'
+import { verifyToken } from '@/lib/jwt'
 
-export async function GET() {
+const prisma = new PrismaClient()
+
+export async function GET(request: NextRequest) {
   try {
-    const response = await axios.get('https://api.pulsepoint.myrfid.nc/api/user/allusers', {
-      auth: {
-        username: 'admin',
-        password: 'admin'
-      },
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      timeout: 10000,
-    })
+    const authorization = request.headers.get('authorization')
+    if (!authorization || !authorization.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Authorization token required', success: false },
+        { status: 401 }
+      )
+    }
 
-    return NextResponse.json(response.data)
-  } catch (error: unknown) {
-    console.error('Proxy API Error:', error)
+    const token = authorization.split(' ')[1]
+    const decoded = await verifyToken(token)
     
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    if (!decoded || !decoded.customerId) {
+      return NextResponse.json(
+        { error: 'Invalid or expired token', success: false },
+        { status: 401 }
+      )
+    }
+
+    // Get all operators for this customer
+    const operators = await prisma.operators.findMany({
+      where: {
+        customer_id: decoded.customerId
+      },
+      orderBy: {
+        username: 'asc'
+      }
+    })
     
+    return NextResponse.json({ 
+      users: operators,
+      success: true
+    })
+  } catch (error) {
+    console.error('Database error while fetching users:', error)
     return NextResponse.json(
       { 
-        error: 'Failed to fetch data from external API',
-        details: errorMessage 
+        error: 'Failed to fetch users',
+        users: [],
+        success: false 
       },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }

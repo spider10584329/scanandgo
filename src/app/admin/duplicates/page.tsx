@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import Image from 'next/image'
+import { toastSuccess, toastError } from '@/components/ui/toast'
 
 interface DuplicateInventory {
   id: number
@@ -45,10 +46,19 @@ interface DuplicateInventory {
 export default function DuplicatesPage() {
   const [duplicates, setDuplicates] = useState<DuplicateInventory[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<DuplicateInventory | null>(null)
   const [editableItem, setEditableItem] = useState<DuplicateInventory | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  
+  // Dropdown states
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false)
+  const [isThrowDropdownOpen, setIsThrowDropdownOpen] = useState(false)
+  
+  // Refs for click outside handling
+  const statusDropdownRef = useRef<HTMLDivElement>(null)
+  const throwDropdownRef = useRef<HTMLDivElement>(null)
 
   // Remove debug logs for production performance
 
@@ -59,14 +69,32 @@ export default function DuplicatesPage() {
     3: { label: 'Retired', className: 'bg-red-100 text-red-800' }
   } as { [key: number]: { label: string; className: string } }), [])
 
+  // Status dropdown options
+  const statusOptions = useMemo(() => ({
+    0: 'Inactive',
+    1: 'Active', 
+    2: 'Maintenance',
+    3: 'Retired'
+  }), [])
+
+  // Throw dropdown options
+  const throwOptions = useMemo(() => ({
+    'false': 'No',
+    'true': 'Yes'
+  }), [])
+
   const getStatusDisplay = useCallback((status: number | null) => {
     if (status === null) return { label: 'Unknown', className: 'bg-gray-100 text-gray-800' }
     return statusMap[status] || { label: 'Unknown', className: 'bg-gray-100 text-gray-800' }
   }, [statusMap])
 
-  const fetchDuplicates = useCallback(async () => {
+  const fetchDuplicates = useCallback(async (forceClear = false, isRefresh = false) => {
     try {
-      setLoading(true)
+      if (isRefresh) {
+        setRefreshing(true)
+      } else {
+        setLoading(true)
+      }
       setError(null) // Clear any previous errors
       const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
       
@@ -75,10 +103,27 @@ export default function DuplicatesPage() {
         return
       }
 
+      // Clear cache first if requested
+      if (forceClear) {
+        try {
+          await fetch('/api/duplicates', {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+        } catch (error) {
+          // Ignore cache clear errors
+        }
+      }
+
       const response = await fetch('/api/duplicates', {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
       })
 
@@ -89,15 +134,26 @@ export default function DuplicatesPage() {
       const data = await response.json()
       
       if (data.success) {
-        setDuplicates(data.duplicates)
+        setDuplicates(data.duplicates)       
       } else {
-        setError(data.error || 'Failed to fetch duplicates')
+        const errorMsg = data.error || 'Failed to fetch duplicates'
+        setError(errorMsg)
+        if (isRefresh) {
+          toastError(errorMsg)
+        }
       }
     } catch (err) {
-      console.error('Error fetching duplicates:', err)
-      setError('Failed to fetch duplicates')
+      const errorMsg = 'Failed to fetch duplicates'
+      setError(errorMsg)
+      if (isRefresh) {
+        toastError(errorMsg)
+      }
     } finally {
-      setLoading(false)
+      if (isRefresh) {
+        setRefreshing(false)
+      } else {
+        setLoading(false)
+      }
     }
   }, [])
 
@@ -109,7 +165,44 @@ export default function DuplicatesPage() {
   const closeEditView = useCallback(() => {
     setEditingItem(null)
     setEditableItem(null)
+    setIsStatusDropdownOpen(false)
+    setIsThrowDropdownOpen(false)
   }, [])
+
+  // Handle dropdown selections
+  const handleStatusSelect = useCallback((status: number) => {
+    if (editableItem) {
+      setEditableItem({ ...editableItem, status })
+    }
+    setIsStatusDropdownOpen(false)
+  }, [editableItem])
+
+  const handleThrowSelect = useCallback((isThrow: boolean) => {
+    if (editableItem) {
+      setEditableItem({ ...editableItem, is_throw: isThrow })
+    }
+    setIsThrowDropdownOpen(false)
+  }, [editableItem])
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+        setIsStatusDropdownOpen(false)
+      }
+      if (throwDropdownRef.current && !throwDropdownRef.current.contains(event.target as Node)) {
+        setIsThrowDropdownOpen(false)
+      }
+    }
+
+    if (isStatusDropdownOpen || isThrowDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isStatusDropdownOpen, isThrowDropdownOpen])
 
   const handleInputChange = useCallback((field: keyof DuplicateInventory, value: string | number | boolean | null) => {
     if (editableItem) {
@@ -153,17 +246,22 @@ export default function DuplicatesPage() {
       const result = await response.json()
       
       if (result.success) {
-        // Refresh the duplicates list
-        await fetchDuplicates()
+        // Refresh the duplicates list with cache clearing (silent refresh)
+        await fetchDuplicates(true, true)
         setEditingItem(result.inventory)
         setEditableItem({ ...result.inventory })
+        toastSuccess('Inventory item updated successfully!')
       } else {
-        setError('Failed to update inventory item: ' + result.error)
+        const errorMsg = 'Failed to update inventory item: ' + result.error
+        setError(errorMsg)
+        toastError(errorMsg)
       }
 
     } catch (err) {
       console.error('Error updating item:', err)
-      setError('An error occurred while updating the inventory item')
+      const errorMsg = 'An error occurred while updating the inventory item'
+      setError(errorMsg)
+      toastError(errorMsg)
     } finally {
       setIsSaving(false)
     }
@@ -203,12 +301,17 @@ export default function DuplicatesPage() {
         if (editingItem && editingItem.id === id) {
           closeEditView()
         }
+        toastSuccess('Inventory item deleted successfully!')
       } else {
-        setError(data.error || 'Failed to delete item')
+        const errorMsg = data.error || 'Failed to delete item'
+        setError(errorMsg)
+        toastError(errorMsg)
       }
     } catch (err) {
       console.error('Error deleting item:', err)
-      setError('Failed to delete item')
+      const errorMsg = 'Failed to delete item'
+      setError(errorMsg)
+      toastError(errorMsg)
     }
   }
 
@@ -311,7 +414,7 @@ export default function DuplicatesPage() {
             <div className="text-red-500 text-lg mb-2">Error</div>
             <p className="text-gray-600">{error}</p>
             <button
-              onClick={fetchDuplicates}
+              onClick={() => fetchDuplicates(true)}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             >
               Retry
@@ -328,10 +431,24 @@ export default function DuplicatesPage() {
         <h1 className="text-2xl font-bold text-gray-900">Duplicates Management</h1>
         <div className="flex items-center space-x-2">
           <button
-            onClick={fetchDuplicates}
-            className="px-6 py-1 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors cursor-pointer"
+            onClick={() => fetchDuplicates(true, true)}
+            disabled={refreshing}
+            className="px-6 py-1 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
-            Refresh
+            {refreshing ? (
+              <>
+                <Image 
+                  src="/6-dots-spinner.svg" 
+                  alt="Refreshing" 
+                  width={16}
+                  height={16}
+                  className="animate-spin"
+                />
+                <span>Refreshing...</span>
+              </>
+            ) : (
+              <span>Refresh</span>
+            )}
           </button>
          
           <span className="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-full">
@@ -383,16 +500,42 @@ export default function DuplicatesPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                      <select
-                        value={editableItem?.status || 0}
-                        onChange={(e) => handleInputChange('status', parseInt(e.target.value))}
-                        className="text-xs text-gray-900 p-2 border border-gray-300 rounded w-full"
-                      >
-                        <option value={0}>Inactive</option>
-                        <option value={1}>Active</option>
-                        <option value={2}>Maintenance</option>
-                        <option value={3}>Retired</option>
-                      </select>
+                      <div className="relative" ref={statusDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                          className="w-full text-left text-xs text-gray-900 border border-gray-400 rounded-sm px-4 py-2 bg-white hover:border-gray-500 focus:outline-none focus:border-gray-500 flex items-center justify-between"
+                        >
+                          <span>{statusOptions[editableItem?.status as keyof typeof statusOptions] || 'Select Status'}</span>
+                          <svg 
+                            className={`w-4 h-4 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        
+                        {isStatusDropdownOpen && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-sm shadow-lg max-h-60 overflow-auto">
+                            {Object.entries(statusOptions).map(([value, label]) => (
+                              <div
+                                key={value}
+                                onClick={() => handleStatusSelect(parseInt(value))}
+                                className="px-4 py-2 text-xs text-gray-900 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                              >
+                                <span>{label}</span>
+                                {editableItem?.status === parseInt(value) && (
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -439,14 +582,42 @@ export default function DuplicatesPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Is Throw</label>
-                      <select
-                        value={editableItem?.is_throw ? 'true' : 'false'}
-                        onChange={(e) => handleInputChange('is_throw', e.target.value === 'true')}
-                        className="text-xs text-gray-900 p-2 border border-gray-300 rounded w-full"
-                      >
-                        <option value="false">No</option>
-                        <option value="true">Yes</option>
-                      </select>
+                      <div className="relative" ref={throwDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsThrowDropdownOpen(!isThrowDropdownOpen)}
+                          className="w-full text-left text-xs text-gray-900 border border-gray-400 rounded-sm px-4 py-2 bg-white hover:border-gray-500 focus:outline-none focus:border-gray-500 flex items-center justify-between"
+                        >
+                          <span>{throwOptions[editableItem?.is_throw ? 'true' : 'false' as keyof typeof throwOptions] || 'Select Option'}</span>
+                          <svg 
+                            className={`w-4 h-4 transition-transform ${isThrowDropdownOpen ? 'rotate-180' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        
+                        {isThrowDropdownOpen && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-sm shadow-lg max-h-60 overflow-auto">
+                            {Object.entries(throwOptions).map(([value, label]) => (
+                              <div
+                                key={value}
+                                onClick={() => handleThrowSelect(value === 'true')}
+                                className="px-4 py-2 text-xs text-gray-900 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                              >
+                                <span>{label}</span>
+                                {editableItem?.is_throw === (value === 'true') && (
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Operator</label>

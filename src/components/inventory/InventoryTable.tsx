@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { toastSuccess, toastError } from '@/components/ui/toast'
 
 interface InventoryItem {
@@ -74,6 +74,14 @@ export default function InventoryTable({
   const [isDragOver, setIsDragOver] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  
+  // Dropdown states
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false)
+  const [isThrowDropdownOpen, setIsThrowDropdownOpen] = useState(false)
+  
+  // Refs for click outside handling
+  const statusDropdownRef = useRef<HTMLDivElement>(null)
+  const throwDropdownRef = useRef<HTMLDivElement>(null)
 
   const fetchInventoryItems = useCallback(async () => {
     try {
@@ -124,9 +132,24 @@ export default function InventoryTable({
     setEditableItem({ ...item })
   }
 
+  // Status and throw dropdown options
+  const statusOptions = useMemo(() => ({
+    0: 'Inactive',
+    1: 'Active', 
+    2: 'Maintenance',
+    3: 'Retired'
+  }), [])
+
+  const throwOptions = useMemo(() => ({
+    'false': 'No',
+    'true': 'Yes'
+  }), [])
+
   const closeDetailView = () => {
     setSelectedItem(null)
     setEditableItem(null)
+    setIsStatusDropdownOpen(false)
+    setIsThrowDropdownOpen(false)
   }
 
   const handleInputChange = (field: keyof InventoryItem, value: string | number | boolean | null) => {
@@ -134,6 +157,41 @@ export default function InventoryTable({
       setEditableItem({ ...editableItem, [field]: value })
     }
   }
+
+  // Handle dropdown selections
+  const handleStatusSelect = useCallback((status: number) => {
+    if (editableItem) {
+      setEditableItem({ ...editableItem, status })
+    }
+    setIsStatusDropdownOpen(false)
+  }, [editableItem])
+
+  const handleThrowSelect = useCallback((isThrow: boolean) => {
+    if (editableItem) {
+      setEditableItem({ ...editableItem, is_throw: isThrow })
+    }
+    setIsThrowDropdownOpen(false)
+  }, [editableItem])
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+        setIsStatusDropdownOpen(false)
+      }
+      if (throwDropdownRef.current && !throwDropdownRef.current.contains(event.target as Node)) {
+        setIsThrowDropdownOpen(false)
+      }
+    }
+
+    if (isStatusDropdownOpen || isThrowDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isStatusDropdownOpen, isThrowDropdownOpen])
 
   const handleUpdate = async () => {
     if (!editableItem) return
@@ -512,33 +570,87 @@ export default function InventoryTable({
                         type="text"
                         value={editableItem?.rfid || ''}
                         onChange={(e) => handleInputChange('rfid', e.target.value)}
-                        className="text-xs text-gray-900 p-2 border border-gray-300 rounded w-full  "
+                        className="text-xs text-gray-900 p-2 border border-gray-300 rounded w-full focus:border-gray-500"
                         placeholder="Enter RFID"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                      <select
-                        value={editableItem?.status || 0}
-                        onChange={(e) => handleInputChange('status', parseInt(e.target.value))}
-                        className="text-xs text-gray-900 p-2 border border-gray-300 rounded w-full  "
-                      >
-                        <option value={0}>Inactive</option>
-                        <option value={1}>Active</option>
-                        <option value={2}>Maintenance</option>
-                        <option value={3}>Retired</option>
-                      </select>
+                      <div className="relative" ref={statusDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                          className="w-full text-left text-xs text-gray-900 border border-gray-400 rounded-sm px-4 py-2 bg-white hover:border-gray-500 focus:outline-none focus:border-gray-500 flex items-center justify-between"
+                        >
+                          <span>{statusOptions[editableItem?.status as keyof typeof statusOptions] || 'Select Status'}</span>
+                          <svg 
+                            className={`w-4 h-4 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        
+                        {isStatusDropdownOpen && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-sm shadow-lg max-h-60 overflow-auto">
+                            {Object.entries(statusOptions).map(([value, label]) => (
+                              <div
+                                key={value}
+                                onClick={() => handleStatusSelect(parseInt(value))}
+                                className="px-4 py-2 text-xs text-gray-900 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                              >
+                                <span>{label}</span>
+                                {editableItem?.status === parseInt(value) && (
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Is Throw</label>
-                      <select
-                        value={editableItem?.is_throw ? 'true' : 'false'}
-                        onChange={(e) => handleInputChange('is_throw', e.target.value === 'true')}
-                        className="text-xs text-gray-900 p-2 border border-gray-300 rounded w-full  "
-                      >
-                        <option value="false">No</option>
-                        <option value="true">Yes</option>
-                      </select>
+                      <div className="relative" ref={throwDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsThrowDropdownOpen(!isThrowDropdownOpen)}
+                          className="w-full text-left text-xs text-gray-900 border border-gray-400 rounded-sm px-4 py-2 bg-white hover:border-gray-500 focus:outline-none focus:border-gray-500 flex items-center justify-between"
+                        >
+                          <span>{throwOptions[editableItem?.is_throw ? 'true' : 'false' as keyof typeof throwOptions] || 'Select Option'}</span>
+                          <svg 
+                            className={`w-4 h-4 transition-transform ${isThrowDropdownOpen ? 'rotate-180' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        
+                        {isThrowDropdownOpen && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-sm shadow-lg max-h-60 overflow-auto">
+                            {Object.entries(throwOptions).map(([value, label]) => (
+                              <div
+                                key={value}
+                                onClick={() => handleThrowSelect(value === 'true')}
+                                className="px-4 py-2 text-xs text-gray-900 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                              >
+                                <span>{label}</span>
+                                {editableItem?.is_throw === (value === 'true') && (
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
