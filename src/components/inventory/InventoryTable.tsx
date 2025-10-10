@@ -108,7 +108,7 @@ export default function InventoryTable({
       if (data.success && data.inventories) {
         setInventoryItems(data.inventories)
       }
-    } catch (error) {
+    } catch {
       // Error fetching inventory items
     } finally {
       setLoading(false)
@@ -129,7 +129,7 @@ export default function InventoryTable({
     setEditableItem(null)
   }
 
-  const handleInputChange = (field: keyof InventoryItem, value: any) => {
+  const handleInputChange = (field: keyof InventoryItem, value: string | number | boolean | null) => {
     if (editableItem) {
       setEditableItem({ ...editableItem, [field]: value })
     }
@@ -185,7 +185,7 @@ export default function InventoryTable({
         toastError('Failed to update inventory item: ' + result.error)
       }
 
-    } catch (error) {
+    } catch {
       toastError('An error occurred while updating the inventory item')
     } finally {
       setIsSaving(false)
@@ -226,7 +226,7 @@ export default function InventoryTable({
         toastError('Failed to delete inventory item: ' + result.error)
       }
 
-    } catch (error) {
+    } catch {
       toastError('An error occurred while deleting the inventory item')
     } finally {
       setIsSaving(false)
@@ -270,7 +270,7 @@ export default function InventoryTable({
         toastError('Failed to delete inventory item: ' + result.error)
       }
 
-    } catch (error) {
+    } catch {
       toastError('An error occurred while deleting the inventory item')
     } finally {
       setIsSaving(false)
@@ -383,7 +383,7 @@ export default function InventoryTable({
         toastError('Failed to create inventory records: ' + result.error)
       }
 
-    } catch (error) {
+    } catch {
       toastError('An error occurred while processing the drop operation')
     } finally {
       setIsProcessing(false)
@@ -634,7 +634,7 @@ export default function InventoryTable({
                   <button
                     onClick={handleUpdate}
                     disabled={isSaving}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none  disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSaving ? (
                       <>
@@ -651,13 +651,13 @@ export default function InventoryTable({
                   <button
                     onClick={handleDelete}
                     disabled={isSaving}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none  disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Delete Item
                   </button>
                   <button
                     onClick={closeDetailView}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500"
+                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none "
                   >
                     Cancel
                   </button>

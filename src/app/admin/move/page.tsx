@@ -376,7 +376,7 @@ export default function MovePage() {
     setDragDirection('from-to')
   }
 
-  const handleDragEnd = (e: React.DragEvent<HTMLTableRowElement>) => {
+  const handleDragEnd = () => {
     // Reset dragging state
     setIsDragging(false)
     setDragDirection(null)
@@ -556,7 +556,7 @@ export default function MovePage() {
     setDragDirection('to-from')
   }
 
-  const handleToDragEnd = (e: React.DragEvent<HTMLTableRowElement>) => {
+  const handleToDragEnd = () => {
     // Reset dragging state
     setIsDragging(false)
     setDragDirection(null)
@@ -966,13 +966,13 @@ export default function MovePage() {
                       }
                     }}
                     placeholder="Enter search barcode or item name"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none "
                   />
                 </div>
                 <button
                   onClick={loadFromInventory}
                   disabled={!fromBuilding || !fromArea || !fromFloor || !fromDetailLocation}
-                  className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-5 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Search
                 </button>
@@ -1050,13 +1050,13 @@ export default function MovePage() {
                       }
                     }}
                     placeholder="Enter search barcode or item name"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none "
                   />
                 </div>
                 <button
                   onClick={loadToInventory}
                   disabled={!toBuilding || !toArea || !toFloor || !toDetailLocation}
-                  className="px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-full hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-5 py-1 bg-green-600 text-white text-sm font-medium rounded  hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Search
                 </button>
@@ -1081,11 +1081,8 @@ export default function MovePage() {
                   <button
                     onClick={handleMoveFromToButtonClick}
                     disabled={!toDetailLocation}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
+                    className="px-4 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  >                   
                     Move {selectedFromItems.size} item{selectedFromItems.size > 1 ? 's' : ''} 
                   </button>
                 )}
@@ -1226,7 +1223,7 @@ export default function MovePage() {
                             setIsDragOverFrom(false)
                             handleMoveToFromButtonClick()
                           }}
-                          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                          className="inline-flex items-center justify-center px-4 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                         >                          
                           Move {selectedToItems.size} Item{selectedToItems.size > 1 ? 's' : ''} Here
                         </button>
@@ -1236,8 +1233,8 @@ export default function MovePage() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16" className="mx-auto mb-1">
                           <path fill="#ad0d0dff" d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0Z"/>
                         </svg>
-                        <p className="text-sm font-medium text-red-700 mb-1">Select complete "From Location"</p>
-                        <p className="text-xs text-red-600">Building, Area, Floor & Detail Location required</p>
+                        <p className="text-sm font-medium text-red-700 mb-1">Select complete &quot;From Location&quot;</p>
+                        <p className="text-xs text-red-600">Building, Area, Floor &amp; Detail Location required</p>
                       </>
                     )}
                   </div>
@@ -1262,8 +1259,8 @@ export default function MovePage() {
                   <button
                     onClick={handleMoveToFromButtonClick}
                     disabled={!fromDetailLocation}
-                    className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-full hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                  >                   
+                    className="px-4 py-1 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  >
                     Move {selectedToItems.size} item{selectedToItems.size > 1 ? 's' : ''} 
                   </button>
                 )}
@@ -1320,7 +1317,7 @@ export default function MovePage() {
                   {toInventory.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-4 py-8 text-center text-gray-500 text-sm">
-                        No items in destination inventory. Move items from the "From inventory" section or search for existing items.
+                        No items in destination inventory. Move items from the &quot;From inventory&quot; section or search for existing items.
                       </td>
                     </tr>
                   ) : (
@@ -1404,7 +1401,7 @@ export default function MovePage() {
                             setIsDragOverTo(false)
                             handleMoveFromToButtonClick()
                           }}
-                          className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                          className="inline-flex items-center justify-center px-4 py-1 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
                         >
                           Move {selectedFromItems.size} Item{selectedFromItems.size > 1 ? 's' : ''} Here
                         </button>
@@ -1414,8 +1411,8 @@ export default function MovePage() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16" className="mx-auto mb-1">
                           <path fill="#ad0d0dff" d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0Z"/>
                         </svg>
-                        <p className="text-sm font-medium text-red-700 mb-1">Select complete "To Location"</p>
-                        <p className="text-xs text-red-600">Building, Area, Floor & Detail Location required</p>
+                        <p className="text-sm font-medium text-red-700 mb-1">Select complete &quot;To Location&quot;</p>
+                        <p className="text-xs text-red-600">Building, Area, Floor &amp; Detail Location required</p>
                       </>
                     )}
                   </div>

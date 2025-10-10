@@ -24,10 +24,22 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const buildingId = searchParams.get('building_id')
+
+    // Build where clause
+    const where: any = {
+      customer_id: decoded.customerId
+    }
+
+    // Filter by building_id if provided
+    if (buildingId) {
+      where.building_id = parseInt(buildingId)
+    }
+
     const areas = await prisma.areas.findMany({
-      where: {
-        customer_id: decoded.customerId
-      },
+      where,
       include: {
         buildings: {
           select: {

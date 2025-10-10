@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/jwt'
 // PATCH - Update inventory item
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get authorization header
@@ -21,7 +21,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    const inventoryId = parseInt(params.id)
+    const resolvedParams = await params
+    const inventoryId = parseInt(resolvedParams.id)
     if (isNaN(inventoryId)) {
       return NextResponse.json({ error: 'Invalid inventory ID' }, { status: 400 })
     }
@@ -105,7 +106,7 @@ export async function PATCH(
 // DELETE - Delete inventory item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get authorization header
@@ -121,7 +122,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    const inventoryId = parseInt(params.id)
+    const resolvedParams = await params
+    const inventoryId = parseInt(resolvedParams.id)
     if (isNaN(inventoryId)) {
       return NextResponse.json({ error: 'Invalid inventory ID' }, { status: 400 })
     }

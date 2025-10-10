@@ -66,8 +66,8 @@ export default function ItemsList({ selectedCategory, onDragStart }: ItemsListPr
         if (inventoryData.success && inventoryData.inventories) {
           registeredBarcodes = new Set(
             inventoryData.inventories
-              .map((inv: any) => inv.barcode)
-              .filter((barcode: string) => barcode) // Remove null/empty barcodes
+              .map((inv: { barcode?: string }) => inv.barcode)
+              .filter((barcode: string | undefined): barcode is string => !!barcode) // Remove null/empty barcodes
           )
         }
       }
