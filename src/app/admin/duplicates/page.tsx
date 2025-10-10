@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import Image from 'next/image'
 
 interface DuplicateInventory {
   id: number
@@ -243,10 +244,12 @@ export default function DuplicatesPage() {
               disabled
               className="px-4 py-1 bg-gray-400 text-white rounded-full cursor-not-allowed flex items-center space-x-2"
             >
-              <img 
+              <Image 
                 src="/6-dots-spinner.svg" 
                 alt="Loading" 
-                className="w-4 h-4 animate-spin"
+                width={16}
+                height={16}
+                className="animate-spin"
               />
               <span>Refreshing...</span>
             </button>
@@ -265,10 +268,12 @@ export default function DuplicatesPage() {
             {/* Central loading content */}
             <div className="relative z-10 text-center p-8">
               <div className="mb-6">
-                <img 
+                <Image 
                   src="/6-dots-spinner.svg" 
                   alt="Loading duplicates" 
-                  className="w-8 h-8 mx-auto animate-spin"
+                  width={32}
+                  height={32}
+                  className="mx-auto animate-spin"
                 />
               </div>
               
@@ -459,10 +464,12 @@ export default function DuplicatesPage() {
                   >
                     {isSaving ? (
                       <>
-                        <img 
+                        <Image 
                           src="/6-dots-spinner.svg" 
                           alt="Loading" 
-                          className="w-4 h-4 animate-spin mr-2"
+                          width={16}
+                          height={16}
+                          className="animate-spin mr-2"
                         />
                         Saving...
                       </>

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/jwt'
 
 // Simple in-memory cache for duplicates (5 minute TTL)
-const cache = new Map<string, { data: any; timestamp: number }>()
+const cache = new Map<string, { data: unknown; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 // Clean up expired cache entries periodically

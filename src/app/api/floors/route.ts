@@ -29,7 +29,10 @@ export async function GET(request: NextRequest) {
     const areaId = searchParams.get('area_id')
 
     // Build where clause
-    const where: any = {
+    const where: {
+      customer_id: number;
+      area_id?: number;
+    } = {
       customer_id: decoded.customerId
     }
 
