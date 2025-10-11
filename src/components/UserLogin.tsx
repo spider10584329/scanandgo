@@ -19,11 +19,6 @@ export default function UserLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-
-    localStorage.clear()
-    sessionStorage.clear()
-    localStorage.removeItem('auth-token')
-    sessionStorage.removeItem('auth-token')
     
     try {
       const response = await axios.post('/api/user-login', {

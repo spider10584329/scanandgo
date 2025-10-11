@@ -16,11 +16,8 @@ export default function ManagerLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+
     
-    localStorage.clear()
-    sessionStorage.clear()
-    localStorage.removeItem('auth-token')
-    sessionStorage.removeItem('auth-token')
     try {
       // Call local admin-login API which handles PulsePoint authentication and token generation
       const response = await axios.post('/api/admin-login', {

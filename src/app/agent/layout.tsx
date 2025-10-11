@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import SecurityGuard from '@/components/auth/SecurityGuard'
 import Sidebar from '@/components/ui/Sidebar'
+import GlobalSearch from '@/components/ui/GlobalSearch'
 import Image from 'next/image'
 import { ClientNameProvider } from '@/contexts/ClientNameContext'
 
@@ -50,8 +51,14 @@ export default function AgentLayout({ children }: AgentLayoutProps) {
         
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top Header with User Dropdown */}
-          <header className="bg-white border-b border-gray-200 px-6 py-5 flex items-center justify-end h-[73px]">
+          {/* Top Header with Search and User Dropdown */}
+          <header className="bg-white border-b border-gray-200 px-6 py-5 flex items-center justify-between h-[73px]">
+            {/* Global Search */}
+            <div className="flex-1 max-w-2xl">
+              <GlobalSearch />
+            </div>
+            
+            {/* User Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button 
                 className="flex items-center space-x-2 border border-gray-200 bg-gray-100 px-4 py-1 rounded-full text-gray-700 hover:text-gray-900 hover:bg-gray-200 hover:border-gray-300 focus:outline-none transition-colors"

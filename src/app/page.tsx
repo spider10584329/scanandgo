@@ -16,7 +16,11 @@ export default function Home() {
     localStorage.removeItem('auth-token')
     document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict'
     
-    // Also clear stale tokens as backup
+    localStorage.clear()
+    sessionStorage.clear()
+    //localStorage.removeItem('auth-token')
+    //sessionStorage.removeItem('auth-token')
+
     clearStaleTokens()
     
     console.log('Home: Authentication data cleared for fresh start')
