@@ -20,6 +20,11 @@ export default function UserLogin() {
     e.preventDefault()
     setIsLoading(true)
 
+    localStorage.clear()
+    sessionStorage.clear()
+    localStorage.removeItem('auth-token')
+    sessionStorage.removeItem('auth-token')
+    
     try {
       const response = await axios.post('/api/user-login', {
         username,

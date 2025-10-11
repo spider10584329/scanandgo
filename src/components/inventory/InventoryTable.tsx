@@ -69,6 +69,7 @@ export default function InventoryTable({
 }: InventoryTableProps) {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
   const [editableItem, setEditableItem] = useState<InventoryItem | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -83,9 +84,13 @@ export default function InventoryTable({
   const statusDropdownRef = useRef<HTMLDivElement>(null)
   const throwDropdownRef = useRef<HTMLDivElement>(null)
 
-  const fetchInventoryItems = useCallback(async () => {
+  const fetchInventoryItems = useCallback(async (isRefresh = false) => {
     try {
-      setLoading(true)
+      if (isRefresh) {
+        setRefreshing(true)
+      } else {
+        setLoading(true)
+      }
       const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
       
       if (!token) {
@@ -119,7 +124,11 @@ export default function InventoryTable({
     } catch {
       // Error fetching inventory items
     } finally {
-      setLoading(false)
+      if (isRefresh) {
+        setRefreshing(false)
+      } else {
+        setLoading(false)
+      }
     }
   }, [selectedBuilding, selectedArea, selectedFloor, selectedDetailLocation])
 
@@ -237,7 +246,7 @@ export default function InventoryTable({
       
       if (result.success) {
         toastSuccess('Inventory item updated successfully!')
-        await fetchInventoryItems()
+        await fetchInventoryItems(true)
         setSelectedItem(editableItem)
       } else {
         toastError('Failed to update inventory item: ' + result.error)
@@ -278,7 +287,7 @@ export default function InventoryTable({
       
       if (result.success) {
         toastSuccess('Inventory item deleted successfully!')
-        await fetchInventoryItems()
+        await fetchInventoryItems(true)
         closeDetailView()
       } else {
         toastError('Failed to delete inventory item: ' + result.error)
@@ -319,7 +328,7 @@ export default function InventoryTable({
       
       if (result.success) {
         toastSuccess('Inventory item deleted successfully!')
-        await fetchInventoryItems()
+        await fetchInventoryItems(true)
         // If the deleted item was selected, close the detail view
         if (selectedItem && selectedItem.id === item.id) {
           closeDetailView()
@@ -429,8 +438,8 @@ export default function InventoryTable({
       const result = await response.json()
       
       if (result.success) {
-        // Refresh the inventory table
-        await fetchInventoryItems()
+        // Refresh the inventory table (silent refresh)
+        await fetchInventoryItems(true)
         
         // Notify parent component
         onItemsAdded?.()
