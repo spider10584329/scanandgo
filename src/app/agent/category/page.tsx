@@ -278,6 +278,11 @@ export default function CategoryPage() {
       return
     }
 
+    if (!newItemBarcode.trim()) {
+      toastError('Please enter a barcode - it is required')
+      return
+    }
+
     setIsAddingItem(true)
     try {
       const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
@@ -290,7 +295,7 @@ export default function CategoryPage() {
         },
         body: JSON.stringify({
           name: newItemName.trim(),
-          barcode: newItemBarcode.trim() || null,
+          barcode: newItemBarcode.trim(),
           category_id: selectedCategory.id
         })
       })
@@ -304,9 +309,9 @@ export default function CategoryPage() {
         setNewItemBarcode('')
         toastSuccess(`Item "${data.item.name}" added successfully!`)
       } else {
-        // Handle specific error messages, especially duplicates     
+        // Handle specific error messages, especially duplicate barcodes     
         if (response.status === 409) {     
-          toastError(`Item "${newItemName.trim()}" already exists in this category!`)
+          toastError(`Barcode "${newItemBarcode.trim()}" already exists! Please use a unique barcode.`)
         } else {
            toastError(data.error || 'Failed to add item')
         }
@@ -365,6 +370,11 @@ export default function CategoryPage() {
       return
     }
 
+    if (!editingItemBarcode.trim()) {
+      toastError('Please enter a barcode - it is required')
+      return
+    }
+
     try {
       const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
         
@@ -377,7 +387,7 @@ export default function CategoryPage() {
         body: JSON.stringify({
           id: editingItemId,
           name: editingItemName.trim(),
-          barcode: editingItemBarcode.trim() || null
+          barcode: editingItemBarcode.trim()
         })
       })
 
@@ -398,9 +408,9 @@ export default function CategoryPage() {
         
         toastSuccess(`Item updated successfully!`)
       } else {
-        // Handle specific error messages, especially duplicates
+        // Handle specific error messages, especially duplicate barcodes
         if (response.status === 409) {
-          toastError(`Item "${editingItemName.trim()}" already exists in this category!`)
+          toastError(`Barcode "${editingItemBarcode.trim()}" already exists! Please use a unique barcode.`)
         } else {
           toastError(data.error || 'Failed to update item')
         }
@@ -582,10 +592,11 @@ export default function CategoryPage() {
                 />
                 <input
                   type="text"
-                  placeholder="Barcode (optional)"
+                  placeholder="Barcode (required)"
                   value={newItemBarcode}
                   onChange={(e) => setNewItemBarcode(e.target.value)}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-[#ffffff]  focus:outline-none "
+                  required
                 />
                 <button 
                   onClick={handleAddItem}
@@ -664,8 +675,9 @@ export default function CategoryPage() {
                                 type="text"
                                 value={editingItemBarcode}
                                 onChange={(e) => setEditingItemBarcode(e.target.value)}
-                                placeholder="Optional"
+                                placeholder="Barcode (required)"
                                 className="w-full px-2 py-1 text-sm border border-gray-400 rounded focus:outline-none "
+                                required
                               />
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
@@ -699,7 +711,7 @@ export default function CategoryPage() {
                               {item.name}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                              {item.barcode || 'No barcode'}
+                              {item.barcode}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
                               <div className="flex gap-1 justify-end">

@@ -135,10 +135,10 @@ model items {
 }
 
 model missing_items {
-  id          Int     @id @default(autoincrement())
-  customer_id Int?
-  location_id Int?
-  barcode     String? @db.VarChar(255)
+  id                 Int     @id @default(autoincrement())
+  customer_id        Int?
+  detail_location_id Int
+  barcode            String? @db.VarChar(255)
 }
 
 model operators {

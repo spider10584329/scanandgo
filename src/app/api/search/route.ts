@@ -123,8 +123,8 @@ export async function GET(request: NextRequest) {
         item.floors?.name,
         item.detail_locations?.name
       ].filter(Boolean).join(' / ') || 'No Location',
-      status: item.status === 1 ? 'Active' : item.status === 2 ? 'Maintenance' : 'Inactive',
-      statusColor: item.status === 1 ? 'green' : item.status === 2 ? 'yellow' : 'red',
+      status: item.status === 1 ? 'Active' : item.status === 2 ? 'Maintenance' : item.status === 3 ? 'Inactive' : item.status === 4 ? 'Missing' : 'Unknown',
+      statusColor: item.status === 1 ? 'green' : item.status === 2 ? 'yellow' : item.status === 3 ? 'red' : item.status === 4 ? 'purple' : 'gray',
       isThrow: item.is_throw ? 'Yes' : 'No',
       deploymentDate: item.inv_date ? new Date(item.inv_date).toLocaleDateString('en-US', {
         year: 'numeric',

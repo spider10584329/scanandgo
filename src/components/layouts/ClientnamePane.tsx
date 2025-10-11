@@ -101,8 +101,8 @@ export default function ClientnamePane() {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-[#cccccc] shadow p-6 hover:shadow-lg transition-shadow">
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">CLIENT NAME</h2>
+    <div className="bg-white rounded-lg border border-[#cccccc] shadow py-5 px-5 hover:shadow-lg transition-shadow">
+      <h2 className="text-lg font-semibold text-gray-800 mb-1">CLIENT NAME</h2>
       
       {isEditing ? (
         <div className="space-y-3">

@@ -66,7 +66,8 @@ export default function DuplicatesPage() {
     0: { label: 'Inactive', className: 'bg-gray-100 text-gray-800' },
     1: { label: 'Active', className: 'bg-green-100 text-green-800' },
     2: { label: 'Maintenance', className: 'bg-yellow-100 text-yellow-800' },
-    3: { label: 'Retired', className: 'bg-red-100 text-red-800' }
+    3: { label: 'Retired', className: 'bg-red-100 text-red-800' },
+    4: { label: 'Missing', className: 'bg-purple-100 text-purple-800' }
   } as { [key: number]: { label: string; className: string } }), [])
 
   // Status dropdown options
@@ -74,7 +75,8 @@ export default function DuplicatesPage() {
     0: 'Inactive',
     1: 'Active', 
     2: 'Maintenance',
-    3: 'Retired'
+    3: 'Retired',
+    4: 'Missing'
   }), [])
 
   // Throw dropdown options

@@ -255,7 +255,11 @@ export default function GlobalSearch({ className = '' }: GlobalSearchProps) {
                                     ? 'bg-green-100 text-green-800' 
                                     : item.statusColor === 'yellow'
                                     ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
+                                    : item.statusColor === 'red'
+                                    ? 'bg-red-100 text-red-800'
+                                    : item.statusColor === 'purple'
+                                    ? 'bg-purple-100 text-purple-800'
+                                    : 'bg-gray-100 text-gray-800'
                                 }`}>
                                   {item.status}
                                 </span>
