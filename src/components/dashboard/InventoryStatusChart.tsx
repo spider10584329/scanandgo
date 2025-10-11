@@ -73,7 +73,7 @@ export default function InventoryStatusChart() {
     )
   }
 
-  const createPieSlice = (item: StatusData, index: number) => {
+  const createDonutSlice = (item: StatusData, index: number) => {
     const percentage = (item.count / total) * 100
     let cumulativePercentage = 0
     
@@ -82,33 +82,79 @@ export default function InventoryStatusChart() {
       cumulativePercentage += (statusData[i].count / total) * 100
     }
     
-    const startAngle = (cumulativePercentage * 360) / 100 - 90 // Start from top
-    const endAngle = ((cumulativePercentage + percentage) * 360) / 100 - 90
-    
-    const radius = 90
+    const outerRadius = 85
+    const innerRadius = 45
     const centerX = 100
     const centerY = 100
+    
+    // For single item (100%), create a more visually interesting display
+    if (statusData.length === 1) {
+      return (
+        <g key={item.status}>
+          <defs>
+            <linearGradient id={`gradient-${item.status}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={item.color} stopOpacity="0.8" />
+              <stop offset="100%" stopColor={item.color} stopOpacity="1" />
+            </linearGradient>
+          </defs>
+          {/* Outer ring */}
+          <circle
+            cx={centerX}
+            cy={centerY}
+            r={outerRadius}
+            fill={`url(#gradient-${item.status})`}
+            className="transition-all duration-300 hover:opacity-90 drop-shadow-sm"
+          />
+          {/* Inner circle (white) */}
+          <circle
+            cx={centerX}
+            cy={centerY}
+            r={innerRadius}
+            fill="white"
+          />
+          {/* Subtle accent ring */}
+          <circle
+            cx={centerX}
+            cy={centerY}
+            r={outerRadius - 5}
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+            strokeOpacity="0.4"
+          />
+        </g>
+      )
+    }
+    
+    const startAngle = (cumulativePercentage * 360) / 100 - 90 // Start from top
+    const endAngle = ((cumulativePercentage + percentage) * 360) / 100 - 90
     
     const startAngleRad = (startAngle * Math.PI) / 180
     const endAngleRad = (endAngle * Math.PI) / 180
     
-    const x1 = centerX + radius * Math.cos(startAngleRad)
-    const y1 = centerY + radius * Math.sin(startAngleRad)
-    const x2 = centerX + radius * Math.cos(endAngleRad)
-    const y2 = centerY + radius * Math.sin(endAngleRad)
+    const x1 = centerX + outerRadius * Math.cos(startAngleRad)
+    const y1 = centerY + outerRadius * Math.sin(startAngleRad)
+    const x2 = centerX + outerRadius * Math.cos(endAngleRad)
+    const y2 = centerY + outerRadius * Math.sin(endAngleRad)
+    
+    const x3 = centerX + innerRadius * Math.cos(endAngleRad)
+    const y3 = centerY + innerRadius * Math.sin(endAngleRad)
+    const x4 = centerX + innerRadius * Math.cos(startAngleRad)
+    const y4 = centerY + innerRadius * Math.sin(startAngleRad)
     
     const largeArc = percentage > 50 ? 1 : 0
     
     const pathData = [
-      `M ${centerX} ${centerY}`,
-      `L ${x1} ${y1}`,
-      `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`,
+      `M ${x1} ${y1}`,
+      `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x2} ${y2}`,
+      `L ${x3} ${y3}`,
+      `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4}`,
       'Z'
     ].join(' ')
     
     // Calculate text position
     const textAngle = (startAngle + endAngle) / 2
-    const textRadius = radius * 0.7
+    const textRadius = (outerRadius + innerRadius) / 2
     const textAngleRad = (textAngle * Math.PI) / 180
     const textX = centerX + textRadius * Math.cos(textAngleRad)
     const textY = centerY + textRadius * Math.sin(textAngleRad)
@@ -120,14 +166,14 @@ export default function InventoryStatusChart() {
           fill={item.color}
           className="transition-all duration-300 hover:opacity-80"
         />
-        {percentage > 5 && (
+        {percentage > 8 && (
           <text
             x={textX}
             y={textY}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="text-sm font-bold fill-white"
-            style={{ fontSize: '12px' }}
+            className="text-xs font-bold fill-white"
+            style={{ fontSize: '11px' }}
           >
             {calculatePercentage(item.count)}%
           </text>
@@ -142,16 +188,7 @@ export default function InventoryStatusChart() {
         {/* Chart Area */}
         <div className="relative mb-6">
           <svg width="200" height="200" viewBox="0 0 200 200">
-            {statusData.map((item, index) => createPieSlice(item, index))}
-            {/* White center circle */}
-            <circle
-              cx="100"
-              cy="100"
-              r="45"
-              fill="white"
-              stroke="#e5e7eb"
-              strokeWidth="1"
-            />
+            {statusData.map((item, index) => createDonutSlice(item, index))}
           </svg>
           
           {/* Center Text */}
