@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       })
     } catch (dbError) {
       // If clients table doesn't exist or query fails, return default
-      console.log('Client table query failed, returning default name:', dbError)
+
       return NextResponse.json({ 
         clientname: 'scanandgo',
         success: true,

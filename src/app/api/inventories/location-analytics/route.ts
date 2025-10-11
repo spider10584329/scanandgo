@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       ) location_items ON dl.id = location_items.detail_location_id
       WHERE b.customer_id = ${decoded.customerId}
       ORDER BY COALESCE(location_items.totalItems, 0) DESC, b.name, a.name, f.name, dl.name
-    ` as any[]
+    ` as Record<string, unknown>[]
 
     const locations = locationStats.map(stat => {
       // Build complete location path

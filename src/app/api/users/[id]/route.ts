@@ -6,8 +6,9 @@ import { verifyToken } from '@/lib/jwt'
 const prisma = new PrismaClient()
 
 // GET - Get specific user
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const authorization = request.headers.get('authorization')
     if (!authorization || !authorization.startsWith('Bearer ')) {
       return NextResponse.json(
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       )
     }
 
-    const userId = parseInt(params.id)
+    const userId = parseInt(id)
     if (isNaN(userId)) {
       return NextResponse.json(
         { error: 'Invalid user ID', success: false },
@@ -68,8 +69,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PATCH - Update user
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const authorization = request.headers.get('authorization')
     if (!authorization || !authorization.startsWith('Bearer ')) {
       return NextResponse.json(
@@ -88,7 +90,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       )
     }
 
-    const userId = parseInt(params.id)
+    const userId = parseInt(id)
     if (isNaN(userId)) {
       return NextResponse.json(
         { error: 'Invalid user ID', success: false },
@@ -114,7 +116,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     // Prepare update data
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
     
     if (isActive !== undefined) {
       updateData.isActive = isActive
@@ -160,8 +162,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 }
 
 // DELETE - Delete user
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const authorization = request.headers.get('authorization')
     if (!authorization || !authorization.startsWith('Bearer ')) {
       return NextResponse.json(
@@ -180,7 +183,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       )
     }
 
-    const userId = parseInt(params.id)
+    const userId = parseInt(id)
     if (isNaN(userId)) {
       return NextResponse.json(
         { error: 'Invalid user ID', success: false },

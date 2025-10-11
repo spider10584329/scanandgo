@@ -23,7 +23,7 @@ export default function Home() {
 
     clearStaleTokens()
     
-    console.log('Home: Authentication data cleared for fresh start')
+
   }, [clearStaleTokens])
 
   return (

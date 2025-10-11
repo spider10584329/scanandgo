@@ -33,7 +33,7 @@ export default function SessionManager() {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'auth-token' && e.newValue === null) {
         // Token was removed in another tab, redirect to home
-        console.log('SessionManager: Token removed in another tab')
+
         router.push('/')
       }
     }
@@ -50,7 +50,7 @@ export default function SessionManager() {
       const sessionClosed = sessionStorage.getItem('session-closed')
       
       if (sessionEnding === 'true' || sessionClosed === 'true') {
-        console.log('SessionManager: Detected interrupted session, clearing stale tokens')
+
         clearStaleTokens()
         sessionStorage.removeItem('session-ending')
         sessionStorage.removeItem('session-closed')

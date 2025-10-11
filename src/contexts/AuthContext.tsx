@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       const isValid = await isTokenValid(token)
       if (!isValid) {
-        console.log('AuthProvider: Clearing stale tokens')
+
         clearAuthData()
         setUser(null)
       }
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (token: string): Promise<boolean> => {
     try {
       setIsLoading(true)
-      console.log('AuthProvider: Starting login process...')
+
       
       // Clear any existing auth data first to prevent conflicts
       clearAuthData()
@@ -123,17 +123,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json()
-      console.log('AuthProvider: Token verification response:', data)
+
       
       if (data.valid && data.payload?.isActive && data.payload?.customerId) {
-        console.log('AuthProvider: Token validated successfully, storing auth data...')
+
         // Store token only after successful verification
         localStorage.setItem('auth-token', token)
         document.cookie = `auth-token=${token}; path=/; max-age=${12 * 60 * 60}; secure; samesite=strict`
         
         setUser(data.payload)
         setIsLoading(false) // Set loading to false before returning success
-        console.log('AuthProvider: Login successful!')
+
         return true
       } else {
         console.error('AuthProvider: Token validation failed - invalid payload or missing customerId:', {

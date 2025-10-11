@@ -33,7 +33,7 @@ export class SessionCleanup {
       const domain = window.location.hostname
       document.cookie = `${this.AUTH_TOKEN_KEY}=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict`
       
-      console.log('SessionCleanup: All auth data cleared')
+
     } catch (error) {
       console.error('SessionCleanup: Error clearing auth data:', error)
     }
@@ -89,7 +89,7 @@ export class SessionCleanup {
       })
 
       if (!response.ok || !(await response.json()).valid) {
-        console.log('SessionCleanup: Found invalid token, clearing...')
+
         this.clearAuthData()
       }
     } catch (error) {
@@ -109,7 +109,7 @@ export class SessionCleanup {
       const sessionClosed = sessionStorage.getItem('session-closed')
       
       if (sessionEnding === 'true' || sessionClosed === 'true') {
-        console.log('SessionCleanup: Detected interrupted session')
+
         this.clearAuthData()
         sessionStorage.removeItem('session-ending')
         sessionStorage.removeItem('session-closed')

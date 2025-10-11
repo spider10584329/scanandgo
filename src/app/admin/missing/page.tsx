@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { toastSuccess, toastError } from '@/components/ui/toast'
+// Toast imports removed - not used in this component
 
 interface MissingItem {
   id: number

@@ -187,7 +187,7 @@ export default function UserPage() {
       }
 
       // Prepare request body
-      const requestBody: any = {
+      const requestBody: Record<string, unknown> = {
         isActive: editableUser.isActive,
         isPasswordRequest: editableUser.isPasswordRequest
       }
@@ -284,47 +284,7 @@ export default function UserPage() {
     }
   }
 
-  // Reset password
-  const handleResetPassword = async (userId: number, username: string) => {
-    if (!confirm(`Are you sure you want to reset password for user "${username}"?`)) {
-      return
-    }
-
-    try {
-      const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
-      
-      if (!token) {
-        setError('No authentication token found')
-        return
-      }
-
-      const response = await fetch(`/api/users/${userId}/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      if (data.success) {
-        await fetchOperators(true)
-        toastSuccess('Password reset successfully')
-      } else {
-        setError(data.error || 'Failed to reset password')
-        toastError(data.error || 'Failed to reset password')
-      }
-    } catch (err) {
-      console.error('Error resetting password:', err)
-      setError('Failed to reset password')
-      toastError('Failed to reset password')
-    }
-  }
+  // Reset password function removed - not currently used
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -617,7 +577,7 @@ export default function UserPage() {
                         className="text-sm text-gray-900 p-2 border border-gray-300 rounded w-full"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Enter a new password to reset the user's password and clear password request status.
+                        Enter a new password to reset the user&apos;s password and clear password request status.
                       </p>
                     </div>
                   </div>
@@ -711,7 +671,7 @@ export default function UserPage() {
                         <button
                           key={key}
                           type="button"
-                          onClick={() => handleFilterSelect(key as any)}
+                          onClick={() => handleFilterSelect(key as 'all' | 'active' | 'inactive' | 'password-request')}
                           className="w-full px-3 py-2 text-left rounded-md hover:bg-gray-100 transition-colors duration-150 text-sm"
                         >
                           <div className="flex items-center justify-between">

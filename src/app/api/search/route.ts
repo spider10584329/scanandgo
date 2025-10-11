@@ -113,6 +113,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Format results for display
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const formattedResults = results.map((item: any) => ({
       id: item.id,
       itemName: item.items?.name || 'Unknown Item',

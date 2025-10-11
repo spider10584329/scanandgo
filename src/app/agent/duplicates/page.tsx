@@ -115,7 +115,7 @@ export default function DuplicatesPage() {
               'Content-Type': 'application/json'
             }
           })
-        } catch (error) {
+        } catch {
           // Ignore cache clear errors
         }
       }
@@ -144,7 +144,7 @@ export default function DuplicatesPage() {
           toastError(errorMsg)
         }
       }
-    } catch (err) {
+    } catch {
       const errorMsg = 'Failed to fetch duplicates'
       setError(errorMsg)
       if (isRefresh) {

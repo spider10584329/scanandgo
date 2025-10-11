@@ -33,7 +33,7 @@ export const useAuth = (requiredRole?: 'admin' | 'agent', redirectTo: string = '
 
     // If no user and we need authentication, redirect
     if (!user) {
-      console.log(`useAuth: No user found, redirecting to ${redirectTo}`)
+
       router.replace(redirectTo)
       return
     }
@@ -52,7 +52,7 @@ export const useAuth = (requiredRole?: 'admin' | 'agent', redirectTo: string = '
       return
     }
 
-    console.log(`useAuth: User authenticated successfully - ${user.username} (${user.role})`)
+
   }, [user, isLoading, requiredRole, redirectTo, router, logout])
 
   return {

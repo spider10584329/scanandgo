@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     // Build where clause
-    const whereClause: any = {
+    const whereClause: Record<string, unknown> = {
       customer_id: decoded.customerId
     }
 

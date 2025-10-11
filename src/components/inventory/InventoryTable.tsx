@@ -69,7 +69,7 @@ export default function InventoryTable({
 }: InventoryTableProps) {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
+  const [, setRefreshing] = useState(false)
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
   const [editableItem, setEditableItem] = useState<InventoryItem | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)

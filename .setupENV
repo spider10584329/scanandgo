@@ -40,8 +40,8 @@ APP_NAME="ScanAndGo"
 APP_VERSION="0.1.0"
 
 # Default admin user (created during database initialization)
-DEFAULT_ADMIN_EMAIL="admin@scanandgo.com"
-DEFAULT_ADMIN_PASSWORD="admin123"
+DEFAULT_ADMIN_EMAIL="adam.p@gmail.com"
+DEFAULT_ADMIN_PASSWORD="123456"
 
 # ===========================================
 # SECURITY CONFIGURATION

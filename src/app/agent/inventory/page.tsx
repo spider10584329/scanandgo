@@ -54,7 +54,7 @@ export default function InventoryPage() {
   }
 
   const handleItemsAdded = () => {
-    console.log('Items successfully added to inventory')
+
     // Trigger refresh of ItemsList by updating the key
     setRefreshItemsKey(prev => prev + 1)
   }

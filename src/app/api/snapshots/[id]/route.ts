@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ success: false, error: 'No authorization token provided' }, { status: 401 })
@@ -19,7 +20,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
 
-    const snapshotId = parseInt(params.id)
+    const snapshotId = parseInt(id)
     if (isNaN(snapshotId)) {
       return NextResponse.json({ success: false, error: 'Invalid snapshot ID' }, { status: 400 })
     }
@@ -48,9 +49,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ success: false, error: 'No authorization token provided' }, { status: 401 })
@@ -63,7 +65,7 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
 
-    const snapshotId = parseInt(params.id)
+    const snapshotId = parseInt(id)
     if (isNaN(snapshotId)) {
       return NextResponse.json({ success: false, error: 'Invalid snapshot ID' }, { status: 400 })
     }
@@ -108,9 +110,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ success: false, error: 'No authorization token provided' }, { status: 401 })
@@ -123,7 +126,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
 
-    const snapshotId = parseInt(params.id)
+    const snapshotId = parseInt(id)
     if (isNaN(snapshotId)) {
       return NextResponse.json({ success: false, error: 'Invalid snapshot ID' }, { status: 400 })
     }

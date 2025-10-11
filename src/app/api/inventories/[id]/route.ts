@@ -71,20 +71,7 @@ export async function PATCH(
     const newBarcode = barcode || oldBarcode
     const barcodeChanged = oldBarcode !== newBarcode
     
-    console.log('Missing items synchronization check:', {
-      inventoryId,
-      oldStatus,
-      newStatus,
-      oldBarcode,
-      newBarcode,
-      barcodeChanged,
-      statusFromBody: status,
-      statusComparison: {
-        isChangingToMissing: newStatus === 4 && oldStatus !== 4,
-        isChangingFromMissing: oldStatus === 4 && newStatus !== 4,
-        stayingMissing: oldStatus === 4 && newStatus === 4
-      }
-    })
+
     
     // Update the inventory item first
     const updatedItem = await prisma.inventories.update({
@@ -152,7 +139,7 @@ export async function PATCH(
       
       // Case 1: Barcode changed and item was in missing status - update missing_items record
       if (barcodeChanged && oldStatus === 4) {
-        console.log('Barcode changed for missing item, updating missing_items record')
+
         
         // Remove old barcode record
         if (oldBarcode) {
@@ -162,7 +149,7 @@ export async function PATCH(
               barcode: oldBarcode
             }
           })
-          console.log(`Removed ${deletedCount.count} old missing item records for barcode: ${oldBarcode}`)
+
         }
         
         // Add new barcode record if still missing status
@@ -177,21 +164,21 @@ export async function PATCH(
           }
           
           if (detailLocationId) {
-            const newMissingItem = await prisma.missing_items.create({
+            await prisma.missing_items.create({
               data: {
                 customer_id: decoded.customerId,
                 detail_location_id: detailLocationId,
                 barcode: finalBarcode
               }
             })
-            console.log(`Created new missing item record for updated barcode: ${finalBarcode}`)
+
           }
         }
       }
       
       // Case 2: Status changed to missing (and barcode didn't change, or was already handled above)
       else if (newStatus === 4 && oldStatus !== 4) {
-        console.log('Item status changed to missing, adding to missing_items table')
+
         
         let detailLocationId = updatedItem.detail_location_id
         
@@ -221,7 +208,7 @@ export async function PATCH(
                 detail_location_id: detailLocationId
               }
             })
-            console.log('Updated existing missing item record')
+
           } else {
             // Create new record
             const newMissingItem = await prisma.missing_items.create({
@@ -231,7 +218,7 @@ export async function PATCH(
                 barcode: finalBarcode
               }
             })
-            console.log('Created new missing item record:', newMissingItem)
+
           }
         } else {
           console.warn('Cannot create missing item record: missing barcode or location')
@@ -240,7 +227,7 @@ export async function PATCH(
       
       // Case 3: Status changed from missing to something else
       else if (oldStatus === 4 && newStatus !== 4) {
-        console.log('Item status changed from missing, removing from missing_items table')
+
         
         const barcodeToRemove = finalBarcode || oldBarcode
         
@@ -251,13 +238,13 @@ export async function PATCH(
               barcode: barcodeToRemove
             }
           })
-          console.log(`Removed ${deletedCount.count} missing item records for barcode: ${barcodeToRemove}`)
+
         }
       }
       
       // Case 4: Item stays in missing status but other fields changed (location, etc.)
       else if (oldStatus === 4 && newStatus === 4 && !barcodeChanged) {
-        console.log('Missing item updated, syncing location in missing_items table')
+
         
         if (finalBarcode) {
           let detailLocationId = updatedItem.detail_location_id
@@ -279,7 +266,7 @@ export async function PATCH(
                 detail_location_id: detailLocationId
               }
             })
-            console.log(`Updated ${updatedCount.count} missing item records with new location`)
+
           }
         }
       }
@@ -364,7 +351,7 @@ export async function DELETE(
             barcode: itemBarcode
           }
         })
-        console.log(`Deleted inventory item - also removed ${deletedCount.count} missing item records for barcode: ${itemBarcode}`)
+
       }
     } catch (missingItemError) {
       console.error('Error removing missing item records during inventory deletion:', missingItemError)

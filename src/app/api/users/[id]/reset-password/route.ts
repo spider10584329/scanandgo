@@ -6,8 +6,9 @@ import { verifyToken } from '@/lib/jwt'
 const prisma = new PrismaClient()
 
 // POST - Reset user password
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const authorization = request.headers.get('authorization')
     if (!authorization || !authorization.startsWith('Bearer ')) {
       return NextResponse.json(
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       )
     }
 
-    const userId = parseInt(params.id)
+    const userId = parseInt(id)
     if (isNaN(userId)) {
       return NextResponse.json(
         { error: 'Invalid user ID', success: false },

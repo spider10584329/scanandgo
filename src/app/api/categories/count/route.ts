@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    console.log("AAA", count)
+
     
     return NextResponse.json({ 
       count,

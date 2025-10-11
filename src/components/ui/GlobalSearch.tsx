@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Image from 'next/image'
 
 interface SearchResult {
@@ -30,7 +30,7 @@ export default function GlobalSearch({ className = '' }: GlobalSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   
   // Debounced search function
-  const debouncedSearch = useCallback(
+  const debouncedSearch = useMemo(() => 
     debounce(async (term: string) => {
       if (term.trim().length === 0) {
         setResults([])
@@ -76,7 +76,7 @@ export default function GlobalSearch({ className = '' }: GlobalSearchProps) {
         setLoading(false)
       }
     }, 300),
-    []
+    [setResults, setIsOpen, setLoading, setError]
   )
 
   // Handle search input change
@@ -292,6 +292,7 @@ export default function GlobalSearch({ className = '' }: GlobalSearchProps) {
 }
 
 // Debounce utility function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number

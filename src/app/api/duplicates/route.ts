@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    console.log('Customer ID:', decoded.customerId)
+
     
     // Test basic inventory access first
     const inventoryCount = await prisma.inventories.count({
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    console.log('Total inventory count:', inventoryCount)
+
     
     // First, get duplicate barcodes using a simpler approach
     const duplicateBarcodes = await prisma.inventories.groupBy({
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    console.log('Duplicate barcodes found:', duplicateBarcodes.length)
+
 
     if (duplicateBarcodes.length === 0) {
       // Cache empty result
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
       .map(g => g.barcode)
       .filter((barcode): barcode is string => barcode !== null && barcode !== '')
 
-    console.log('Duplicate barcode list:', duplicateBarcodesList)
+
 
     // Find all inventory items with duplicate barcodes
     const duplicateInventories = await prisma.inventories.findMany({
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
       ]
     })
 
-    console.log('Duplicate inventories found:', duplicateInventories.length)
+
 
     // Cache the results
     cache.set(cacheKey, {

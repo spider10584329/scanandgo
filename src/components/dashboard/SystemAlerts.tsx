@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 
 interface Alert {
@@ -17,11 +17,7 @@ export default function SystemAlerts() {
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchSystemAlerts()
-  }, [])
-
-  const fetchSystemAlerts = async () => {
+  const fetchSystemAlerts = useCallback(async () => {
     try {
       const token = localStorage.getItem('auth-token') || 
                    document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
@@ -49,7 +45,11 @@ export default function SystemAlerts() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchSystemAlerts()
+  }, [fetchSystemAlerts])
 
   const generateMockAlerts = () => {
     const mockAlerts: Alert[] = [

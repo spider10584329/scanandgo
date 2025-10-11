@@ -21,8 +21,8 @@ interface PaginationInfo {
 export default function SnapshotPage() {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [, setRefreshing] = useState(false)
+  const [, setError] = useState<string | null>(null)
   const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null)
   const [editableSnapshot, setEditableSnapshot] = useState<Snapshot | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -127,14 +127,14 @@ export default function SnapshotPage() {
 
   useEffect(() => {
     fetchSnapshots(false, true) // Initial load
-  }, [])
+  }, [fetchSnapshots])
 
   // Handle changes in search, pagination, and sorting without loading screen
   useEffect(() => {
     if (!loading) { // Only fetch if not in initial loading state
       fetchSnapshots()
     }
-  }, [currentPage, pageSize, sortBy, sortOrder, searchTerm])
+  }, [fetchSnapshots, loading])
 
   // Handle sort change
   const handleSortChange = (value: string) => {
@@ -158,11 +158,11 @@ export default function SnapshotPage() {
     setCurrentPage(1)
   }
 
-  // Handle snapshot selection
-  const handleSnapshotSelect = (snapshot: Snapshot) => {
-    setSelectedSnapshot(snapshot)
-    setEditableSnapshot({ ...snapshot })
-  }
+  // Handle snapshot selection - function not currently used
+  // const handleSnapshotSelect = (snapshot: Snapshot) => {
+  //   setSelectedSnapshot(snapshot)
+  //   setEditableSnapshot({ ...snapshot })
+  // }
 
   const closeDetailView = () => {
     setSelectedSnapshot(null)
