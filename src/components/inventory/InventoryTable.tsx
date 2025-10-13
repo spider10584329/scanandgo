@@ -58,6 +58,8 @@ interface InventoryTableProps {
   selectedFloor: LocationData | null
   selectedDetailLocation: LocationData | null
   onItemsAdded?: () => void
+  onInventoryChanged?: () => void
+  refreshTrigger?: number
 }
 
 export default function InventoryTable({ 
@@ -65,7 +67,9 @@ export default function InventoryTable({
   selectedArea, 
   selectedFloor, 
   selectedDetailLocation,
-  onItemsAdded
+  onItemsAdded,
+  onInventoryChanged,
+  refreshTrigger
 }: InventoryTableProps) {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -135,6 +139,13 @@ export default function InventoryTable({
   useEffect(() => {
     fetchInventoryItems()
   }, [fetchInventoryItems])
+
+  // Refresh when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger !== undefined) {
+      fetchInventoryItems(true) // Silent refresh
+    }
+  }, [refreshTrigger, fetchInventoryItems])
 
   const handleRowClick = (item: InventoryItem) => {
     setSelectedItem(item)
@@ -290,6 +301,8 @@ export default function InventoryTable({
         toastSuccess('Inventory item deleted successfully!')
         await fetchInventoryItems(true)
         closeDetailView()
+        // Notify parent that inventory changed to refresh items list
+        onInventoryChanged?.()
       } else {
         toastError('Failed to delete inventory item: ' + result.error)
       }
@@ -334,6 +347,8 @@ export default function InventoryTable({
         if (selectedItem && selectedItem.id === item.id) {
           closeDetailView()
         }
+        // Notify parent that inventory changed to refresh items list
+        onInventoryChanged?.()
       } else {
         toastError('Failed to delete inventory item: ' + result.error)
       }
@@ -497,7 +512,7 @@ export default function InventoryTable({
   return (
     <>
       <div 
-        className={`bg-white rounded-lg shadow h-[calc(100vh-370px)] relative ${
+        className={`bg-white rounded-lg shadow sm:h-[calc(100vh-440px)] xl:h-[calc(100vh-370px)] relative ${
           isDragOver 
             ? 'border-2 border-dashed border-gray-300' 
             : ''
@@ -789,8 +804,8 @@ export default function InventoryTable({
             </div>
           </div>
         ) : inventoryItems.length > 0 ? (
-          <div className="flex flex-col h-[calc(100vh-450px)] mx-6 mb-6">
-            <div className="border border-gray-200 rounded-lg overflow-hidden flex flex-col h-full">
+          <div className="flex flex-col  sm:h-[calc(100vh-530px)] xl:h-[calc(100vh-450px)] mx-6 mb-6 pb-3">
+            <div className="border border-gray-200 rounded-lg overflow-hidden flex flex-col h-full ">
               <div className="flex-1 overflow-hidden">
                 <div className="h-full overflow-y-auto">
                   <table className="min-w-full">

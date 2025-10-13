@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { toastSuccess, toastError } from '@/components/ui/toast'
 
 interface Item {
   id: number
@@ -17,12 +18,28 @@ interface Category {
 interface ItemsListProps {
   selectedCategory: Category | null
   onDragStart?: (items: Item[]) => void
+  selectedBuilding?: { id: number; name: string } | null
+  selectedArea?: { id: number; name: string } | null
+  selectedFloor?: { id: number; name: string } | null
+  selectedDetailLocation?: { id: number; name: string } | null
+  onItemsAdded?: () => void
+  refreshTrigger?: number
 }
 
-export default function ItemsList({ selectedCategory, onDragStart }: ItemsListProps) {
+export default function ItemsList({ 
+  selectedCategory, 
+  onDragStart, 
+  selectedBuilding, 
+  selectedArea, 
+  selectedFloor, 
+  selectedDetailLocation, 
+  onItemsAdded,
+  refreshTrigger
+}: ItemsListProps) {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set())
+  const [isInserting, setIsInserting] = useState(false)
 
   const fetchItems = useCallback(async () => {
     try {
@@ -89,6 +106,13 @@ export default function ItemsList({ selectedCategory, onDragStart }: ItemsListPr
   useEffect(() => {
     fetchItems()
   }, [fetchItems])
+
+  // Refresh when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger !== undefined) {
+      fetchItems()
+    }
+  }, [refreshTrigger, fetchItems])
 
   const handleItemToggle = (itemId: number) => {
     setSelectedItems(prev => {
@@ -196,6 +220,83 @@ export default function ItemsList({ selectedCategory, onDragStart }: ItemsListPr
   }
 
   const canDrag = selectedItems.size > 0
+  const hasAllLocationFilters = selectedBuilding && selectedArea && selectedFloor && selectedDetailLocation
+  const canInsert = selectedItems.size > 0 && hasAllLocationFilters
+
+
+
+  const handleInsertItems = async () => {
+    if (!canInsert) {
+      toastError('Please select items and ensure all location filters are set.')
+      return
+    }
+
+    setIsInserting(true)
+
+    try {
+      const selectedItemsArray = items.filter(item => selectedItems.has(item.id))
+
+      // Prepare location data
+      const locationData = {
+        buildingId: selectedBuilding?.id || null,
+        areaId: selectedArea?.id || null,
+        floorId: selectedFloor?.id || null,
+        detailLocationId: selectedDetailLocation?.id || null
+      }
+
+      // Get authentication token
+      const token = localStorage.getItem('auth-token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
+      
+      if (!token) {
+        toastError('No authentication token found')
+        return
+      }
+
+      // Create inventory records
+      const response = await fetch('/api/inventories', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          items: selectedItemsArray.map((item: Item) => ({
+            id: item.id,
+            category_id: item.category_id
+          })),
+          locationData
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        // Clear selections and refresh items
+        setSelectedItems(new Set())
+        
+        // Notify parent components
+        onItemsAdded?.()
+        
+        // Refresh items list
+        await fetchItems()
+        
+        // Show success message
+        toastSuccess(`Successfully added ${result.createdCount} items to inventory!`)
+      } else {
+        toastError('Failed to create inventory records: ' + result.error)
+      }
+
+    } catch (error) {
+      console.error('Error inserting items:', error)
+      toastError('An error occurred while adding items to inventory')
+    } finally {
+      setIsInserting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -213,75 +314,85 @@ export default function ItemsList({ selectedCategory, onDragStart }: ItemsListPr
   }
 
   return (
-    <div className="mt-6 ">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-gray-900">Items</h3>
-        <div className="flex items-center space-x-2">
-          {selectedItems.size > 0 && (
-            <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex items-center justify-between mb-2 sm:mb-3 flex-shrink-0">
+        <h3 className="text-xs sm:text-sm font-medium text-gray-900">Items</h3>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          {selectedItems.size > 0 && hasAllLocationFilters ? (
+            <button
+              onClick={handleInsertItems}
+              disabled={isInserting}
+              className="text-xs bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full transition-colors"
+              title="Insert selected items to inventory"
+            >
+              {isInserting ? 'Inserting...' : `${selectedItems.size} selected`}
+            </button>
+          ) : selectedItems.size > 0 ? (
+            <span className="text-xs text-blue-600 bg-blue-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
               {selectedItems.size} selected
             </span>
-          )}
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+          ) : null}
+          <span className="text-xs text-gray-500 bg-gray-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
             {items.length} items
           </span>
         </div>
       </div>
       
-     
-      
       {items.length > 0 ? (
-        <div className="space-y-1 h-[calc(100vh-380px)] overflow-y-auto">
-          {items.map((item) => {
-            const isSelected = selectedItems.has(item.id)
-            return (
-              <div 
-                key={item.id} 
-                draggable={canDrag}
-                onDragStart={canDrag ? handleDragStart : undefined}
-                className={`flex items-center justify-between px-3 py-2 border border-gray-200 rounded hover:bg-gray-50 transition-all duration-150 ${
-                  isSelected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white'
-                } ${canDrag ? 'cursor-grab active:cursor-grabbing hover:shadow-md' : ''}`}
-              >
-                <div className="flex items-center space-x-2">
-                  {isSelected && canDrag && (
-                    <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M7 2a1 1 0 000 2h6a1 1 0 100-2H7zM7 8a1 1 0 000 2h6a1 1 0 100-2H7zM7 14a1 1 0 100 2h6a1 1 0 100-2H7z" />
-                    </svg>
-                  )}
-                  <span className="text-sm text-gray-900">{item.name}</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="relative">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 bg-transparent border border-gray-400 checked:border-gray-500 appearance-none"
-                      checked={isSelected}
-                      onChange={() => handleItemToggle(item.id)}
-                    />
-                    {isSelected && (
-                      <svg className="absolute inset-0 w-4 h-4 text-gray-600 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="space-y-1 sm:space-y-1.5">
+            {items.map((item) => {
+              const isSelected = selectedItems.has(item.id)
+              return (
+                <div 
+                  key={item.id} 
+                  draggable={canDrag}
+                  onDragStart={canDrag ? handleDragStart : undefined}
+                  className={`flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded hover:bg-gray-50 transition-all duration-150 ${
+                    isSelected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white'
+                  } ${canDrag ? 'cursor-grab active:cursor-grabbing hover:shadow-md' : ''}`}
+                >
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 flex-1 min-w-0">
+                    {isSelected && canDrag && (
+                      <svg className="w-3 h-3 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M7 2a1 1 0 000 2h6a1 1 0 100-2H7zM7 8a1 1 0 000 2h6a1 1 0 100-2H7zM7 14a1 1 0 100 2h6a1 1 0 100-2H7z" />
                       </svg>
                     )}
+                    <span className="text-xs sm:text-sm text-gray-900 truncate">{item.name}</span>
+                  </div>
+                  <div className="flex items-center flex-shrink-0 ml-2">
+                    <div className="relative">
+                      <input 
+                        type="checkbox" 
+                        className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-transparent border border-gray-400 checked:border-gray-500 appearance-none"
+                        checked={isSelected}
+                        onChange={() => handleItemToggle(item.id)}
+                      />
+                      {isSelected && (
+                        <svg className="absolute inset-0 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
                 </div>
-                
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500">
-          <svg className="mx-auto h-8 w-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>          
-          <p className="text-xs">
-            {selectedCategory 
-              ? `No items available in category "${selectedCategory.name}"`
-              : 'No items available'
-            }
-          </p>
+        <div className="flex-1 flex items-center justify-center text-center text-gray-500">
+          <div>
+            <svg className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>          
+            <p className="text-xs">
+              {selectedCategory 
+                ? `No items available in category "${selectedCategory.name}"`
+                : 'No items available'
+              }
+            </p>
+          </div>
         </div>
       )}
     </div>
