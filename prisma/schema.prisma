@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://node:Find71-eye43@localhost:3306/scanandgo_prod"
 }
 
 model role {

@@ -8,14 +8,14 @@
 # ===========================================
 # MariaDB/MySQL Database Connection
 # Format: mysql://username:password@host:port/database_name
-DATABASE_URL="mysql://root@localhost:3306/scanandgo_prod"
+DATABASE_URL="mysql://node:Find71-eye43@localhost:3306/scanandgo_prod"
 
 # Alternative database configuration (if needed)
 DB_HOST="localhost"
 DB_PORT="3306"
 DB_NAME="scanandgo_prod"
-DB_USER="root"
-DB_PASSWORD=""
+DB_USER="node"
+DB_PASSWORD="Find71-eye43"
 
 # ===========================================
 # NEXT.JS CONFIGURATION
@@ -40,8 +40,8 @@ APP_NAME="ScanAndGo"
 APP_VERSION="0.1.0"
 
 # Default admin user (created during database initialization)
-DEFAULT_ADMIN_EMAIL="adam.p@gmail.com"
-DEFAULT_ADMIN_PASSWORD="123456"
+DEFAULT_ADMIN_EMAIL="admin@scanandgo.com"
+DEFAULT_ADMIN_PASSWORD="admin123"
 
 # ===========================================
 # SECURITY CONFIGURATION

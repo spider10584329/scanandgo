@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, memo } from 'react'
+import { useState, useMemo, memo, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useClientName } from '@/hooks/useClientName'
@@ -10,6 +10,10 @@ interface SidebarProps {
   currentPath?: string
   onLogout: () => void
   username?: string
+}
+
+interface SidebarRef {
+  toggle: () => void
 }
 
 interface MenuItem {
@@ -123,9 +127,34 @@ const agentMenuItems: MenuItem[] = [
   },
 ]
 
-const Sidebar = memo(function Sidebar({ role, currentPath }: SidebarProps) {
+const Sidebar = memo(forwardRef<SidebarRef, SidebarProps>(function Sidebar({ role, currentPath }, ref) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
   const { clientName } = useClientName()
+  
+  // Check screen size and auto-collapse on small screens
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const isSmall = window.innerWidth < 600
+      setIsSmallScreen(isSmall)
+      
+      // Auto-collapse on small screens, but allow manual control on larger screens
+      if (isSmall) {
+        setIsCollapsed(true)
+      }
+      // On larger screens, don't automatically change the collapsed state
+      // Let user control it manually
+    }
+
+    // Check on mount
+    checkScreenSize()
+
+    // Add event listener for resize
+    window.addEventListener('resize', checkScreenSize)
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
   
   // Memoize menu items to prevent recalculation on every render
   const menuItems = useMemo(() => role === 'admin' ? adminMenuItems : agentMenuItems, [role])
@@ -137,36 +166,51 @@ const Sidebar = memo(function Sidebar({ role, currentPath }: SidebarProps) {
       : menuItems.filter(item => item.label !== 'User' && item.label !== 'Snapshot')
   }, [role, menuItems])
 
+  // Handle manual toggle - allow expansion on small screens for overlay mode
+  const handleToggle = useCallback(() => {
+    setIsCollapsed(prev => !prev)
+  }, [])
+
+  // Expose the toggle function to parent component via ref
+  useImperativeHandle(ref, () => ({
+    toggle: handleToggle
+  }), [handleToggle])
+
   return (
-    <div className={`h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
-      isCollapsed ? 'w-16' : 'w-72'
-    }`}>
+    <>
+      {/* Mobile Overlay */}
+      {isSmallScreen && !isCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsCollapsed(true)}
+        />
+      )}
+      
+      <div className={`h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
+        isSmallScreen && !isCollapsed 
+          ? 'fixed left-0 top-0 z-50 w-72' 
+          : isCollapsed 
+            ? 'w-16' 
+            : 'w-72'
+      }`}>
       {/* Header with Logo */}
-      <div className="flex items-center justify-between px-4 py-5 border-b border-gray-200  h-[73px]">
-        <div className="flex items-center space-x-3">
-          <div >
+      <div className="flex items-center px-2 py-5 border-b border-gray-200 h-[73px]">
+        <div className="flex items-center space-x-3 w-full">
+          <div className="flex-shrink-0 mx-auto">
             <Image 
                 src="/logo.webp" 
                 alt="Scanandgo Logo" 
-                width={64}
-                height={64}
-                className="mx-auto w-auto"
+                width={isCollapsed ? 40 : 64}
+                height={isCollapsed ? 40 : 64}
+                className="w-auto"
                 />
           </div>
           {!isCollapsed && (
-            <div>
-              <span className="font-bold text-gray-900 text-lg">{clientName}</span>
+            <div className="flex-1 min-w-0">
+              <span className="font-bold text-gray-900 text-lg truncate block">{clientName}</span>
             </div>
           )}
         </div>
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1 rounded-md hover:bg-gray-100 transition-colors"
-        >
-          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isCollapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
-          </svg>
-        </button>
       </div>
 
       {/* Navigation Menu */}
@@ -242,7 +286,8 @@ const Sidebar = memo(function Sidebar({ role, currentPath }: SidebarProps) {
         </div>
       </div>
     </div>
+    </>
   )
-})
+}))
 
 export default Sidebar

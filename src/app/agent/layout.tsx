@@ -17,6 +17,7 @@ export default function AgentLayout({ children }: AgentLayoutProps) {
   const { user, logout } = useAuth('agent')
   const pathname = usePathname()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const sidebarRef = useRef<{ toggle: () => void }>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
@@ -42,20 +43,36 @@ export default function AgentLayout({ children }: AgentLayoutProps) {
       <ClientNameProvider>
         <div className="flex h-screen bg-gray-50">
         {/* Sidebar */}
-        <Sidebar 
-          role="agent"
-          currentPath={pathname}
-          onLogout={logout}
-          username={user?.username}
-        />
+        <div className="flex-shrink-0">
+          <Sidebar 
+            ref={sidebarRef}
+            role="agent"
+            currentPath={pathname}
+            onLogout={logout}
+            username={user?.username}
+          />
+        </div>
         
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Top Header with Search and User Dropdown */}
-          <header className="bg-white border-b border-gray-200 px-6 py-5 flex items-center justify-between h-[73px]">
-            {/* Global Search */}
-            <div className="flex-1 max-w-2xl">
-              <GlobalSearch />
+          <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-5 flex items-center justify-between h-[73px]">
+            <div className="flex items-center flex-1">
+              {/* Sidebar Toggle Button */}
+              <button
+                onClick={() => sidebarRef.current?.toggle()}
+                className="p-2 rounded-md hover:bg-gray-100 transition-colors mr-3"
+                title="Toggle Sidebar"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              
+              {/* Global Search */}
+              <div className="flex-1 max-w-2xl mr-4">
+                <GlobalSearch />
+              </div>
             </div>
             
             {/* User Dropdown */}
