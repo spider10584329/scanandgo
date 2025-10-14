@@ -768,36 +768,42 @@ export default function InventoryTable({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="mt-4 flex justify-end space-x-3">
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-3">
                   <button
                     onClick={handleUpdate}
                     disabled={isSaving}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none  disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center px-4 py-2 sm:px-3 sm:py-1.5 border border-transparent text-sm sm:text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSaving ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-3 sm:w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Saving...
+                        <span className="hidden sm:inline">Saving...</span>
+                        <span className="sm:hidden">Save</span>
                       </>
                     ) : (
-                      'Update Item'
+                      <>
+                        <span className="hidden sm:inline">Update Item</span>
+                        <span className="sm:hidden">Update</span>
+                      </>
                     )}
                   </button>
                   <button
                     onClick={handleDelete}
                     disabled={isSaving}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none  disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center px-4 py-2 sm:px-3 sm:py-1.5 border border-transparent text-sm sm:text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Delete Item
+                    <span className="hidden sm:inline">Delete Item</span>
+                    <span className="sm:hidden">Delete</span>
                   </button>
                   <button
                     onClick={closeDetailView}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none "
+                    className="inline-flex items-center justify-center px-4 py-2 sm:px-3 sm:py-1.5 border border-gray-300 text-sm sm:text-xs font-medium rounded shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                   >
-                    Cancel
+                    <span className="hidden sm:inline">Cancel</span>
+                    <span className="sm:hidden">Cancel</span>
                   </button>
                 </div>
               </div>
