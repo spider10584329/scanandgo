@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 
 interface SearchResult {
@@ -141,7 +142,7 @@ export default function GlobalSearch({ className = '' }: GlobalSearchProps) {
           value={searchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search inventory by item name or barcode..."
-          className="w-[350px] text-[14px] pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none  focus:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
+          className="w-full max-w-[350px] text-[14px] pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
         />
         {loading && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -157,10 +158,10 @@ export default function GlobalSearch({ className = '' }: GlobalSearchProps) {
       </div>
 
       {/* Search Results Dialog */}
-      {isOpen && (
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <>
           {/* Dialog */}
-          <div className="fixed inset-x-4 top-20 bottom-4 bg-white rounded-lg shadow-2xl border-1 border-gray-400 z-50 flex flex-col max-w-6xl mx-auto">
+          <div className="fixed inset-x-2 sm:inset-x-4 top-16 sm:top-20 bottom-4 bg-white rounded-lg shadow-2xl border-1 border-gray-400 z-[120] flex flex-col max-w-6xl mx-auto">
             {/* Dialog Header */}
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <div>
@@ -285,7 +286,8 @@ export default function GlobalSearch({ className = '' }: GlobalSearchProps) {
               )}
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   )

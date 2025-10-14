@@ -198,8 +198,8 @@ export default function AdminDashboard() {
       <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 lg:mb-6">API Key</h1>
       
       <div className="flex flex-col xl:flex-row gap-4 lg:gap-6 min-h-[calc(100vh-210px)]">
-        <div className="flex-1 bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6">
-          <h2 className="text-lg font-semibold mb-2">Generate API Key</h2>
+        <div className="flex-1 bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6 min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold mb-2">Generate API Key</h2>
           <p className="text-sm text-gray-600 mb-4">Create a new API key for accessing the inventory system.</p>
           
           <div className="space-y-4">
@@ -305,14 +305,14 @@ export default function AdminDashboard() {
           </div>
         </div>
         
-        <div className="flex-1 bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6">
-          <h2 className="text-lg font-semibold mb-2">Export to external file</h2>
+        <div className="flex-1 bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6 min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold mb-2">Export to external file</h2>
           <p className="text-sm text-gray-600 mb-4">Download inventory data in various formats for external use.</p>
           
           <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-md p-4">
-              <h3 className="font-medium text-green-800 mb-2">Export to CSV file</h3>
-              <p className="text-sm text-green-700 mb-6">
+            <div className="bg-green-50 border border-green-200 rounded-md p-3 sm:p-4">
+              <h3 className="font-medium text-green-800 mb-2 text-sm sm:text-base">Export to CSV file</h3>
+              <p className="text-sm text-green-700 mb-4 sm:mb-6 leading-relaxed">
                 CSV files are plaintext data files separated by commas, so they can be opened directly as Excel sheets and are a very useful file format for exporting and importing data from other programs.
               </p>
               
@@ -341,21 +341,21 @@ export default function AdminDashboard() {
             </div>
 
             <div className="bg-pink-50 border border-pink-200 rounded-md p-3">
-              <h4 className="font-medium text-pink-800 mb-1">File Information</h4>
-              <ul className="text-xs text-pink-700 bg-pink-100 p-2 rounded overflow-x-auto">
-                <li>• Filename: inventory_customer_{customerId || 'ID'}_{new Date().toISOString().split('T')[0]}.csv</li>
-                <li>• Format: UTF-8 encoded CSV</li>
-                <li>• Compatible with Excel, Google Sheets, and other spreadsheet applications</li>
+              <h4 className="font-medium text-pink-800 mb-1 text-sm">File Information</h4>
+              <ul className="text-xs text-pink-700 bg-pink-100 p-2 rounded space-y-1">
+                <li className="break-words">• Filename: inventory_customer_{customerId || 'ID'}_{new Date().toISOString().split('T')[0]}.csv</li>
+                <li className="break-words">• Format: UTF-8 encoded CSV</li>
+                <li className="break-words">• Compatible with Excel, Google Sheets, and other spreadsheet applications</li>
               </ul>
             </div>
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-              <h4 className="font-medium text-yellow-800 mb-1">CSV Structure</h4>
+              <h4 className="font-medium text-yellow-800 mb-1 text-sm">CSV Structure</h4>
               <p className="text-sm text-yellow-700 mb-2">
                 The CSV file will contain all inventory fields with resolved names:
               </p>
               <div className="text-xs text-yellow-700 bg-yellow-100 p-2 rounded overflow-x-auto">
-                <code>id,customer_id,category_name,item_name,building_name,area_name,floor_name,detail_location_name,purchase_date,...</code>
+                <code className="block whitespace-nowrap sm:whitespace-normal sm:break-words">id,customer_id,category_name,item_name,building_name,area_name,floor_name,detail_location_name,purchase_date,...</code>
               </div>
             </div>
           </div>
