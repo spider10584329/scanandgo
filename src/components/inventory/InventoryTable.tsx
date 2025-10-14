@@ -512,7 +512,7 @@ export default function InventoryTable({
   return (
     <>
       <div 
-        className={`bg-white rounded-lg shadow sm:h-[calc(100vh-440px)] xl:h-[calc(100vh-370px)] relative ${
+        className={`bg-white rounded-lg shadow sm:h-[calc(100vh-440px)] xl:h-[calc(100vh-370px)] p-4 sm:p-4 lg:p-6  relative ${
           isDragOver 
             ? 'border-2 border-dashed border-gray-300' 
             : ''
@@ -522,13 +522,13 @@ export default function InventoryTable({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="px-6 py-4  border-gray-200">
+        <div className="pb-4 border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Inventory Items</h2>
         </div>
 
         {selectedItem ? (
           // Detail View
-          <div className="flex flex-col h-[calc(100vh-450px)] mx-6 mb-6">
+          <div className="flex flex-col h-[calc(100vh-450px)]">
             <div className="border border-gray-200 rounded-lg overflow-hidden flex flex-col h-full bg-white">
               <div className="px-6 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                 <h3 className="text-md  text-gray-600">
@@ -804,11 +804,11 @@ export default function InventoryTable({
             </div>
           </div>
         ) : inventoryItems.length > 0 ? (
-          <div className="flex flex-col  sm:h-[calc(100vh-530px)] xl:h-[calc(100vh-450px)] mx-6 mb-6 pb-3">
+          <div className="flex flex-col h-[calc(100vh-530px)] lg:h-[calc(100vh-530px)] xl:h-[calc(100vh-450px)]  pb-3">
             <div className="border border-gray-200 rounded-lg overflow-hidden flex flex-col h-full ">
               <div className="flex-1 overflow-hidden">
-                <div className="h-full overflow-y-auto">
-                  <table className="min-w-full">
+                <div className=" overflow-y-auto h-[calc(100vh-530px)] lg:h-[calc(100vh-530px)] xl:h-[calc(100vh-450px)]" >
+                  <table className="min-w-full ">
                     <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">

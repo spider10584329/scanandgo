@@ -68,13 +68,13 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="p-2 sm:p-4 lg:p-6">
+    <div className="p-4 sm:p-4 lg:p-6">
       <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Inventory Management</h1>
       <div className="flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6">
         {/* Category Pane - Controlled width reduction */}
         <div className="lg:col-span-4 xl:col-span-3 lg:min-w-0">
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4 lg:p-6 h-[400px] sm:h-[500px] lg:h-[calc(100vh-180px)] flex flex-col">
-            <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 lg:mb-6 flex-shrink-0">Category</h2>
+          <div className="bg-white rounded-lg shadow p-4 sm:p-4 lg:p-6 h-[400px] sm:h-[500px] lg:h-[calc(100vh-180px)] flex flex-col">
+            <h2 className="text-md sm:text-lg lg:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 lg:mb-6 flex-shrink-0">Category</h2>
             
             {/* Category Select */}
             <div className="mb-3 sm:mb-4 lg:mb-6 flex-shrink-0">
@@ -100,10 +100,10 @@ export default function InventoryPage() {
 
         {/* Inventory Pane */}
         <div className="lg:col-span-8 xl:col-span-9 lg:min-w-0">
-          <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+          <div className="space-y-3 sm:space-y-3 lg:space-y-6">
             {/* Location Filters */}
-            <div className="bg-white rounded-lg shadow p-3 sm:p-4 lg:p-6">
-              <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Location Filters</h2>
+            <div className="bg-white rounded-lg shadow p-4 sm:p-4 lg:p-6">
+              <h2 className="text-lg sm:text-lg lg:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Location Filters</h2>
               {/* Progressive responsive grid: 4 cols on XL+, 2 cols on SM-LG, 1 col on mobile */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
                 {/* Building & Area Row */}
