@@ -69,7 +69,7 @@ export default function InventoryPage() {
 
   return (
     <div className="p-4 sm:p-4 lg:p-6">
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Inventory Management</h1>
+      <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Inventory Management</h1>
       <div className="flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6">
         {/* Category Pane - Controlled width reduction */}
         <div className="lg:col-span-4 xl:col-span-3 lg:min-w-0">

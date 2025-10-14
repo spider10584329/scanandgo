@@ -63,6 +63,12 @@ const adminMenuItems: MenuItem[] = [
     icon: <Image src="/duplicate.svg" alt="Duplicates" width={20} height={20} />
   },
   { 
+    id: 'API Key', 
+    label: 'API Key', 
+    href: '/admin/apikey', 
+    icon: <Image src="/key.svg" alt="API Key" width={20} height={20} />
+  },
+  { 
     id: 'snapshot', 
     label: 'Snapshot', 
     href: '/admin/snapshot', 
@@ -114,10 +120,16 @@ const agentMenuItems: MenuItem[] = [
     icon: <Image src="/duplicate.svg" alt="Duplicates" width={20} height={20} />
   },
   { 
-    id: 'snapshot', 
-    label: 'Snapshot', 
-    href: '/agent/snapshot', 
-    icon: <Image src="/snapshot.svg" alt="Snapshot" width={20} height={20} />
+    id: 'duplicates', 
+    label: 'Duplicates', 
+    href: '/agent/duplicates', 
+    icon: <Image src="/duplicate.svg" alt="Duplicates" width={20} height={20} />
+  },
+  { 
+    id: 'API Key', 
+    label: 'API Key', 
+    href: '/agent/apikey', 
+    icon: <Image src="/key.svg" alt="API Key" width={20} height={20} />
   },
   { 
     id: 'user', 

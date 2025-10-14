@@ -893,7 +893,7 @@ export default function MovePage() {
 
   return (
     <div className="p-2 sm:p-4 lg:p-6">
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Move Management</h1>
+      <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Move Management</h1>
       <div className="flex flex-col lg:grid lg:grid-cols-9 gap-3 sm:gap-4 lg:gap-6 min-h-0  ">
         <div className="lg:col-span-3 xl:col-span-3 2xl:col-span-2 flex flex-col gap-6 lg:min-w-0">
           <div className="bg-white rounded-lg shadow p-6 flex-1 lg:min-h-0">

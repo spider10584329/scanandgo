@@ -343,7 +343,7 @@ export default function DuplicatesPage() {
     return (
       <div className="p-2 sm:p-4 lg:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Duplicates Management</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900">Duplicates Management</h1>
           <div className="flex items-center gap-2">
             <button
               disabled
@@ -410,7 +410,7 @@ export default function DuplicatesPage() {
   if (error) {
     return (
       <div className="p-2 sm:p-4 lg:p-6">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4">Duplicates Management</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 mb-4">Duplicates Management</h1>
         <div className="bg-white rounded-lg shadow p-3 sm:p-4 lg:p-6">
           <div className="text-center py-8">
             <div className="text-red-500 text-lg mb-2">Error</div>
@@ -430,7 +430,7 @@ export default function DuplicatesPage() {
   return (
     <div className="p-2 sm:p-4 lg:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-2 sm:gap-4 mb-4 ">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Duplicates Management</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900">Duplicates Management</h1>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
           <button
             onClick={() => fetchDuplicates(true, true)}

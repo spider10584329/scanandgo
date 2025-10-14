@@ -615,7 +615,7 @@ export default function LocationPage() {
 
   return (
     <div className="p-2 sm:p-3 md:p-4 lg:p-6">
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Location Management</h1>
+      <h1 className="text-lg sm:text-2xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Location Management</h1>
       
       {/* Responsive layout - progressive panel wrapping */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 auto-rows-fr">

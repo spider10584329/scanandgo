@@ -363,7 +363,7 @@ export default function SnapshotPage() {
     return (
       <div className="p-2 sm:p-4 lg:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Snapshot Management</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900">Snapshot Management</h1>
           <div className="flex items-center gap-2">
             <button
               disabled
@@ -414,7 +414,7 @@ export default function SnapshotPage() {
   return (
     <div className="p-2 sm:p-4 lg:p-6">
       <div className="flex items-center justify-between mb-4 p-2 sm:mb-6">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Snapshot Management</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900">Snapshot Management</h1>
       </div>
 
       <div className="bg-white rounded-lg shadow h-[calc(100vh-160px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-190px)]">

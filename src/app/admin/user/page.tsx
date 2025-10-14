@@ -311,7 +311,7 @@ export default function UserPage() {
     return (
       <div className="p-2 sm:p-4 lg:p-6">
         <div className="flex flex-col gap-4 mb-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">User Management</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900">User Management</h1>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
             <button
               disabled
@@ -375,7 +375,7 @@ export default function UserPage() {
   if (error) {
     return (
       <div className="p-2 sm:p-4 lg:p-6">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">User Management</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">User Management</h1>
         <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="text-center py-6 sm:py-8">
             <div className="text-red-500 text-base sm:text-lg mb-2">Error</div>
@@ -395,7 +395,7 @@ export default function UserPage() {
   return (
     <div className="p-2 sm:p-4 lg:p-6">
       <div className="flex flex-col gap-4 mb-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 pt-2">User Management</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 pt-2">User Management</h1>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
           <button
             onClick={() => fetchOperators(true)}
