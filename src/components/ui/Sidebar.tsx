@@ -118,13 +118,7 @@ const agentMenuItems: MenuItem[] = [
     label: 'Duplicates', 
     href: '/agent/duplicates', 
     icon: <Image src="/duplicate.svg" alt="Duplicates" width={20} height={20} />
-  },
-  { 
-    id: 'duplicates', 
-    label: 'Duplicates', 
-    href: '/agent/duplicates', 
-    icon: <Image src="/duplicate.svg" alt="Duplicates" width={20} height={20} />
-  },
+  },  
   { 
     id: 'API Key', 
     label: 'API Key', 

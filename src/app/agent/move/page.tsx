@@ -892,16 +892,16 @@ export default function MovePage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Move Management</h1>
-      <div className="grid grid-cols-1 md:grid-cols-9 gap-6 h-[calc(100vh-180px)]">
-        <div className="col-span-1 md:col-span-2 flex flex-col gap-6">        
-          <div className="bg-white rounded-lg shadow p-6 flex-1">
+    <div className="p-2 sm:p-4 lg:p-6">
+      <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Move Management</h1>
+      <div className="flex flex-col lg:grid lg:grid-cols-9 gap-3 sm:gap-4 lg:gap-6 min-h-0  ">
+        <div className="lg:col-span-3 xl:col-span-3 2xl:col-span-2 flex flex-col gap-6 lg:min-w-0">
+          <div className="bg-white rounded-lg shadow p-6 flex-1 lg:min-h-0">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">From location</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Building:</label>
-                <div className="flex-1">
+            <div className="space-y-2">
+              <div className="flex flex-row items-center gap-3 container-type-inline-size">
+                <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0 @sm:hidden">Building:</label>
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="building"
@@ -912,9 +912,9 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Area:</label>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="area"
@@ -926,9 +926,9 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Floor:</label>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="floor"
@@ -940,9 +940,9 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Detail:</label>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="detail_location"
@@ -954,38 +954,40 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">BARCODE:</label>
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={fromBarcodeSearch}
-                    onChange={(e) => setFromBarcodeSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        loadFromInventory()
-                      }
-                    }}
-                    placeholder="Enter search barcode or item name"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none "
-                  />
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row items-center gap-3">
+                  <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">BARCODE:</label>
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={fromBarcodeSearch}
+                      onChange={(e) => setFromBarcodeSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          loadFromInventory()
+                        }
+                      }}
+                      placeholder="Enter search barcode or item name"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none"
+                    />
+                  </div>
                 </div>
                 <button
                   onClick={loadFromInventory}
                   disabled={!fromBuilding || !fromArea || !fromFloor || !fromDetailLocation}
-                  className="px-5 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-auto self-end px-5 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Search
                 </button>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6 flex-1">
+          <div className="bg-white rounded-lg shadow p-6 flex-1 lg:min-h-0">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">To location</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
+            <div className="space-y-2">
+              <div className="flex flex-row items-center gap-3">
                 <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Building:</label>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="building"
@@ -996,9 +998,9 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Area:</label>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="area"
@@ -1010,9 +1012,9 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Floor:</label>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="floor"
@@ -1024,9 +1026,9 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">Detail:</label>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="[&>div>label]:hidden">
                     <LocationSelect
                       type="detail_location"
@@ -1038,26 +1040,28 @@ export default function MovePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">BARCODE:</label>
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={toBarcodeSearch}
-                    onChange={(e) => setToBarcodeSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        loadToInventory()
-                      }
-                    }}
-                    placeholder="Enter search barcode or item name"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none "
-                  />
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row items-center gap-3">
+                  <label className="text-sm font-medium text-gray-700 w-20 flex-shrink-0">BARCODE:</label>
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={toBarcodeSearch}
+                      onChange={(e) => setToBarcodeSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          loadToInventory()
+                        }
+                      }}
+                      placeholder="Enter search barcode or item name"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none"
+                    />
+                  </div>
                 </div>
                 <button
                   onClick={loadToInventory}
                   disabled={!toBuilding || !toArea || !toFloor || !toDetailLocation}
-                  className="px-5 py-1 bg-green-600 text-white text-sm font-medium rounded  hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-auto self-end px-5 py-1 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Search
                 </button>
@@ -1065,32 +1069,32 @@ export default function MovePage() {
             </div>
           </div>
         </div>
-        <div className="col-span-1 md:col-span-7 flex flex-col gap-6">
-          <div className="bg-white rounded-lg shadow p-6 flex-1">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">From inventory</h2>
-              <div className="flex items-center gap-3">
+        <div className="lg:col-span-6 xl:col-span-6 2xl:col-span-7 flex flex-col gap-3 sm:gap-4 lg:gap-6 lg:min-w-0">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-4 lg:p-6 flex-1 lg:min-h-0">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-4">
+              <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800">From inventory</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 {isDragging && selectedFromItems.size > 0 && (
-                  <div className="text-sm text-gray-600 font-medium flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium flex items-center">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
-                    Dragging {selectedFromItems.size} item{selectedFromItems.size > 1 ? 's' : ''}
+                    <span className="hidden sm:inline">Dragging </span>{selectedFromItems.size} item{selectedFromItems.size > 1 ? 's' : ''}
                   </div>
                 )}
                 {selectedFromItems.size > 0 && (
                   <button
                     onClick={handleMoveFromToButtonClick}
                     disabled={!toDetailLocation}
-                    className="px-4 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="w-full sm:w-auto px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 sm:gap-2"
                   >                   
-                    Move {selectedFromItems.size} item{selectedFromItems.size > 1 ? 's' : ''} 
+                    <span className="hidden sm:inline">Move </span>{selectedFromItems.size} item{selectedFromItems.size > 1 ? 's' : ''} 
                   </button>
                 )}
               </div>
             </div>
             <div 
-              className={`overflow-auto max-h-[calc(50vh-120px)] border rounded-lg relative transition-colors ${
+              className={`overflow-auto h-[calc(50vh-200px)]  border rounded-lg relative transition-colors ${
                 isDragOverFrom 
                   ? 'border-gray-400 border-2 border-dashed bg-gray-50' 
                   : 'border-gray-200'
@@ -1102,7 +1106,7 @@ export default function MovePage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 sticky top-0">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8 sm:w-10 lg:w-12">
                       <input
                         type="checkbox"
                         checked={fromInventory.length > 0 && selectedFromItems.size === fromInventory.length}
@@ -1116,22 +1120,22 @@ export default function MovePage() {
                         className="rounded border-gray-300 text-black bg-transparent shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-24 lg:w-32">
                       Category
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 sm:w-24 lg:w-28">
                       Item Name
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-28 lg:w-36">
                       Barcode
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 sm:w-36 lg:w-48">
                       Location
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-20 lg:w-24">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-20 lg:w-24">
                       Is Throw
                     </th>
                   </tr>
@@ -1155,7 +1159,7 @@ export default function MovePage() {
                           onDragStart={(e) => handleDragStart(e, item)}
                           onDragEnd={handleDragEnd}
                         >
-                          <td className="px-4 py-2 whitespace-nowrap">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap">
                             <input
                               type="checkbox"
                               checked={selectedFromItems.has(item.id)}
@@ -1163,19 +1167,19 @@ export default function MovePage() {
                               className="rounded border-gray-300 text-black bg-transparent shadow-sm focus:border-gray-500 focus:ring-gray-500"
                             />
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(item.categories?.name)}`}>
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${getCategoryColor(item.categories?.name)}`}>
                               {item.categories?.name || 'Uncategorized'}
                             </span>
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                             {item.items?.name || 'Unknown Item'}
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-600">
                             {item.barcode || item.items?.barcode || '-'}
                           </td>
-                          <td className="px-4 py-2 text-sm text-gray-600">
-                            <div className="max-w-48 break-words">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-xs sm:text-sm text-gray-600">
+                            <div className="max-w-32 sm:max-w-48 break-words">
                               <div>{item.buildings?.name || '-'}</div>
                               <div className="text-xs text-gray-500">
                                 {item.areas?.name && `${item.areas.name} / `}
@@ -1184,13 +1188,13 @@ export default function MovePage() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.className}`}>
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${statusDisplay.className}`}>
                               {statusDisplay.text}
                             </span>
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap text-xs sm:text-sm">
+                            <span className={`inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
                               item.is_throw ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                             }`}>
                               {item.is_throw ? 'Yes' : 'No'}
@@ -1243,16 +1247,16 @@ export default function MovePage() {
               )}
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6 flex-1">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">To inventory</h2>
-              <div className="flex items-center gap-3">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-4 lg:p-6 flex-1">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-4">
+              <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800">To inventory</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 {isDragging && selectedToItems.size > 0 && dragDirection === 'to-from' && (
-                  <div className="text-sm text-gray-600 font-medium flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium flex items-center">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
-                    Dragging {selectedToItems.size} item{selectedToItems.size > 1 ? 's' : ''} to source
+                    <span className="hidden sm:inline">Dragging </span>{selectedToItems.size} item{selectedToItems.size > 1 ? 's' : ''}<span className="hidden sm:inline"> to source</span>
                   </div>
                 )}
                
@@ -1260,15 +1264,15 @@ export default function MovePage() {
                   <button
                     onClick={handleMoveToFromButtonClick}
                     disabled={!fromDetailLocation}
-                    className="px-4 py-1 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="w-full sm:w-auto px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 bg-green-600 text-white text-xs sm:text-sm font-medium rounded hover:bg-green-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 sm:gap-2"
                   >
-                    Move {selectedToItems.size} item{selectedToItems.size > 1 ? 's' : ''} 
+                    <span className="hidden sm:inline">Move </span>{selectedToItems.size} item{selectedToItems.size > 1 ? 's' : ''} 
                   </button>
                 )}
               </div>
             </div>
             <div 
-              className={`overflow-auto max-h-[calc(50vh-120px)] border rounded-lg relative transition-colors ${
+              className={`overflow-auto h-[calc(50vh-200px)] border rounded-lg relative transition-colors ${
                 isDragOverTo 
                   ? 'border-gray-400 border-2 border-dashed bg-gray-50' 
                   : 'border-gray-200'
@@ -1280,7 +1284,7 @@ export default function MovePage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 sticky top-0">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8 sm:w-10 lg:w-12">
                       <input
                         type="checkbox"
                         checked={toInventory.length > 0 && selectedToItems.size === toInventory.length}
@@ -1294,22 +1298,22 @@ export default function MovePage() {
                         className="rounded border-gray-300 text-black bg-transparent shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-24 lg:w-32">
                       Category
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 sm:w-24 lg:w-28">
                       Item Name
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-28 lg:w-36">
                       Barcode
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 sm:w-36 lg:w-48">
                       Location
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-20 lg:w-24">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-20 lg:w-24">
                       Is Throw
                     </th>
                   </tr>
@@ -1333,7 +1337,7 @@ export default function MovePage() {
                           onDragStart={(e) => handleToDragStart(e, item)}
                           onDragEnd={handleToDragEnd}
                         >
-                          <td className="px-4 py-2 whitespace-nowrap">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap">
                             <input
                               type="checkbox"
                               checked={selectedToItems.has(item.id)}
@@ -1341,19 +1345,19 @@ export default function MovePage() {
                               className="rounded border-gray-300 text-black bg-transparent shadow-sm focus:border-gray-500 focus:ring-gray-500"
                             />
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(item.categories?.name)}`}>
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${getCategoryColor(item.categories?.name)}`}>
                               {item.categories?.name || 'Uncategorized'}
                             </span>
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                             {item.items?.name || 'Unknown Item'}
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-600">
                             {item.barcode || item.items?.barcode || '-'}
                           </td>
-                          <td className="px-4 py-2 text-sm text-gray-600">
-                            <div className="max-w-48 break-words">
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-xs sm:text-sm text-gray-600">
+                            <div className="max-w-32 sm:max-w-48 break-words">
                               <div>{item.buildings?.name || '-'}</div>
                               <div className="text-xs text-gray-500">
                                 {item.areas?.name && `${item.areas.name} / `}
@@ -1362,13 +1366,13 @@ export default function MovePage() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.className}`}>
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${statusDisplay.className}`}>
                               {statusDisplay.text}
                             </span>
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          <td className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 whitespace-nowrap text-xs sm:text-sm">
+                            <span className={`inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
                               item.is_throw ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                             }`}>
                               {item.is_throw ? 'Yes' : 'No'}

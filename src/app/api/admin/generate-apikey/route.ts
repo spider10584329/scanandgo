@@ -48,11 +48,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify token and check if user is admin
+    // Verify token and check if user is admin or agent
     const payload = await verifyToken(token)
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || (payload.role !== 'admin' && payload.role !== 'agent')) {
       return NextResponse.json(
-        { success: false, message: 'Unauthorized: Admin access required' },
+        { success: false, message: 'Unauthorized: Admin or Agent access required' },
         { status: 403 }
       )
     }

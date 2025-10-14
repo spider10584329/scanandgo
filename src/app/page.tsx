@@ -55,7 +55,7 @@ export default function Home() {
               USER
             </button>
             <button 
-              className={`px-4 py-2 text-sm  ${
+              className={`px-4 py-2 text-sm rounded-tr-2xl ${
                 activeTab === 'manager' 
                   ? 'bg-white border-b-0 font-bold' 
                   : 'bg-gray-100'
