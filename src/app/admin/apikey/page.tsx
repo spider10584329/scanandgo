@@ -203,7 +203,7 @@ export default function AdminDashboard() {
           <p className="text-sm text-gray-600 mb-4">Create a new API key for accessing the inventory system.</p>
           
           <div className="space-y-4">
-            {/* Customer ID Input */}
+            {/* Customer ID Display (Read-only) */}
             <div>
               <label htmlFor="customerId" className="block text-sm font-medium text-gray-700 mb-1">
                 Customer ID
@@ -212,9 +212,9 @@ export default function AdminDashboard() {
                 id="customerId"
                 type="text"
                 value={customerId}
-                onChange={(e) => setCustomerId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter customer ID"
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none text-gray-600"
+                placeholder="Customer ID from your account"
               />
             </div>
 

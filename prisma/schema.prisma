@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://node:Find71-eye43@localhost:3306/scanandgo_prod"
+  url      = env("DATABASE_URL")
 }
 
 model role {
@@ -157,4 +157,13 @@ model snapshots {
   customer_id Int
   name        String? @db.VarChar(120)
   date        String? @db.VarChar(120)
+}
+
+model apikey {
+  id          Int      @id @default(autoincrement())
+  customer_id Int
+  api_key     String   @unique @db.VarChar(255)
+  created_at  DateTime @default(now())
+
+  @@map("apikey")
 }
