@@ -16,12 +16,49 @@ export default function AdminDashboard() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
 
-  // Set default customer ID from authenticated user
+  // Set default customer ID from authenticated user and fetch existing API key
   useEffect(() => {
     if (user?.customerId) {
       setCustomerId(user.customerId.toString())
+      fetchExistingApiKey()
     }
   }, [user])
+
+  const fetchExistingApiKey = async () => {
+    try {
+      // Get auth token
+      const token = localStorage.getItem('auth-token') || document.cookie
+        .split('; ')
+        .find(row => row.startsWith('auth-token='))
+        ?.split('=')[1]
+
+      if (!token) {
+        return
+      }
+
+      const response = await fetch('/api/admin/get-apikey', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.exists && data.apiKey) {
+          setCurrentApiKey(data.apiKey)
+          
+          // Generate the complete API URL with existing key
+          const baseUrl = window.location.origin
+          const apiUrl = `${baseUrl}/api/scanandgo/inventory?customer_id=${user?.customerId}&apikey=${data.apiKey}`
+          setCompleteUrl(apiUrl)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching existing API key:', error)
+    }
+  }
 
   const generateRandomApiKey = async () => {
     if (!customerId) {

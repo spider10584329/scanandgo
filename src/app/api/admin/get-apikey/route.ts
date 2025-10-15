@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
-import { v4 as uuidv4 } from 'uuid'
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // Get token from cookies or Authorization header
     const token = request.cookies.get('auth-token')?.value || 
@@ -25,7 +24,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use customer_id from the verified token (ignore any request body)
+    // Use customer_id from the verified token
     const customerId = payload.customerId
 
     if (!customerId) {
@@ -35,27 +34,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate a new API key
-    const apiKey = uuidv4()
-
     try {
-      // Check if a key already exists for this customer_id
+      // Check if an API key exists for this customer_id
       const existingKey = await prisma.$queryRaw<Array<{api_key: string}>>`
         SELECT api_key FROM apikey WHERE customer_id = ${customerId} LIMIT 1
       `
 
       if (existingKey.length > 0) {
-        // Update existing key with new key
-        await prisma.$executeRaw`
-          UPDATE apikey SET api_key = ${apiKey}, created_at = NOW() 
-          WHERE customer_id = ${customerId}
-        `
+        return NextResponse.json({
+          success: true,
+          apiKey: existingKey[0].api_key,
+          exists: true
+        })
       } else {
-        // Insert new key record
-        await prisma.$executeRaw`
-          INSERT INTO apikey (customer_id, api_key, created_at) 
-          VALUES (${customerId}, ${apiKey}, NOW())
-        `
+        return NextResponse.json({
+          success: true,
+          apiKey: null,
+          exists: false
+        })
       }
     } catch (dbError) {
       console.error('Database error:', dbError)
@@ -65,13 +61,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      apiKey: apiKey
-    })
-
   } catch (error) {
-    console.error('Generate API key error:', error)
+    console.error('Get API key error:', error)
     return NextResponse.json(
       { success: false, message: 'Internal server error' },
       { status: 500 }

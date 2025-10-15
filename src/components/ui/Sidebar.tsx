@@ -118,19 +118,7 @@ const agentMenuItems: MenuItem[] = [
     label: 'Duplicates', 
     href: '/agent/duplicates', 
     icon: <Image src="/duplicate.svg" alt="Duplicates" width={20} height={20} />
-  },  
-  { 
-    id: 'API Key', 
-    label: 'API Key', 
-    href: '/agent/apikey', 
-    icon: <Image src="/key.svg" alt="API Key" width={20} height={20} />
-  },
-  { 
-    id: 'user', 
-    label: 'User', 
-    href: '/agent/user', 
-    icon: <Image src="/users.svg" alt="User" width={20} height={20} />
-  },
+  },   
 ]
 
 const Sidebar = memo(forwardRef<SidebarRef, SidebarProps>(function Sidebar({ role, currentPath }, ref) {
