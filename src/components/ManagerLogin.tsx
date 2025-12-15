@@ -19,14 +19,30 @@ export default function ManagerLogin() {
 
     
     try {
-      // Call local admin-login API which handles PulsePoint authentication and token generation
-      const response = await axios.post('/api/admin-login', {
+      // Call unified signin API with admin role
+      console.log('[ManagerLogin] Submitting admin login request...')
+      const response = await axios.post('/api/signin', {
         email,
-        password
+        password,
+        role: 'admin'
+      })
+      
+      console.log('[ManagerLogin] API Response:', {
+        success: response.data.success,
+        hasToken: !!response.data.token,
+        message: response.data.message,
+        user: response.data.user
       })
       
       if (response.data.success && response.data.token) {
+        console.log('[ManagerLogin] Token received, attempting to validate...')
+        
+        // Store token in localStorage as backup
+        localStorage.setItem('auth-token', response.data.token)
+        
         const loginSuccess = await login(response.data.token)
+        
+        console.log('[ManagerLogin] Login validation result:', loginSuccess)
         
         if (loginSuccess) {
           toastSuccess('Login successful! Redirecting...')
@@ -37,12 +53,14 @@ export default function ManagerLogin() {
           
           // Redirect to admin area
           setTimeout(() => {
-            router.push('/admin')
-          }, 1500)
+            router.push('/admin/dashboard')
+          }, 1000)
         } else {
+          console.error('[ManagerLogin] Token validation failed in AuthContext')
           toastError('Login validation failed. Please try again.')
         }
       } else {
+        console.error('[ManagerLogin] Login API returned error:', response.data.message)
         toastError(response.data.message || 'Login failed')
       }
       

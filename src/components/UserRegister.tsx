@@ -32,8 +32,12 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
       return
     }
     
-    try {      
-      const adminCheckResponse = await axios.get('https://api.pulsepoint.myrfid.nc/api/user/allusers', {
+    try {
+      // Get the correct PulsePoint API URL from environment or use default
+      const apiUrl = process.env.NEXT_PUBLIC_PULSEPOINT_API_URL || 'https://api.pulsepoint.clinotag.com'
+      
+      console.log('[UserRegister] Checking admin email with PulsePoint API:', apiUrl)
+      const adminCheckResponse = await axios.get(`${apiUrl}/api/user/allusers`, {
         auth: {
           username: 'admin',
           password: 'admin'
@@ -54,10 +58,14 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
       }
       const customerId = adminUser.id      
      
+      // Check if username already exists in local database
+      console.log('[UserRegister] Checking username availability:', username)
       try {
         const usernameCheckResponse = await axios.post('/api/check-username', {
           username: username
         })
+        
+        console.log('[UserRegister] Username check response:', usernameCheckResponse.data)
         
         if (usernameCheckResponse.data.exists) {
           toastError('Account already exists.')
@@ -65,13 +73,24 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
           return
         }
       } catch (dbError: unknown) {
-        console.error('Username check error:', dbError)
-        toastError('Failed to check username availability.')
+        console.error('[UserRegister] Username check error:', dbError)
+        
+        // Provide more specific error message
+        let errorMsg = 'Failed to check username availability.'
+        if (dbError && typeof dbError === 'object' && 'response' in dbError) {
+          const axiosError = dbError as { response?: { data?: { error?: string } } }
+          if (axiosError.response?.data?.error) {
+            errorMsg = `Database Error: ${axiosError.response.data.error}`
+          }
+        }
+        
+        toastError(errorMsg)
         setIsLoading(false)
         return
       }
       
-      // Step 4: Register the new user in local MariaDB
+      // Register the new user in local MariaDB
+      console.log('[UserRegister] Registering user:', { username, customerId })
       try {
         const registrationResponse = await axios.post('/api/register-user', {
           adminEmail,
@@ -79,6 +98,8 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
           password,
           customerId
         })
+        
+        console.log('[UserRegister] Registration response:', registrationResponse.data)
         
         if (registrationResponse.data.success) {
           toastSuccess('Registration successful! Account pending approval.')
@@ -95,8 +116,18 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
           toastError(registrationResponse.data.message || 'Registration failed.')
         }
       } catch (regError: unknown) {
-        console.error('Registration error:', regError)
-        toastError('Failed to register user.')
+        console.error('[UserRegister] Registration error:', regError)
+        
+        // Provide more specific error message
+        let errorMsg = 'Failed to register user.'
+        if (regError && typeof regError === 'object' && 'response' in regError) {
+          const axiosError = regError as { response?: { data?: { error?: string } } }
+          if (axiosError.response?.data?.error) {
+            errorMsg = `Registration Error: ${axiosError.response.data.error}`
+          }
+        }
+        
+        toastError(errorMsg)
       }
       
     } catch (error: unknown) {

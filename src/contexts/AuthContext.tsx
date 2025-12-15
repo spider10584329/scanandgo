@@ -101,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login function
   const login = useCallback(async (token: string): Promise<boolean> => {
     try {
+      console.log('[AuthContext] Starting login process...')
       setIsLoading(true)
 
       
@@ -108,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAuthData()
       
       // Verify token directly
+      console.log('[AuthContext] Verifying token with /api/verify-token...')
       const response = await fetch('/api/verify-token', {
         method: 'POST',
         headers: {
@@ -116,16 +118,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ token }),
       })
 
+      console.log('[AuthContext] Verify-token response status:', response.status)
+
       if (!response.ok) {
-        console.error(`AuthProvider: Token verification failed with status: ${response.status}`)
+        console.error(`[AuthContext] Token verification failed with status: ${response.status}`)
         setIsLoading(false)
         return false
       }
 
       const data = await response.json()
 
+      console.log('[AuthContext] Token verification response:', {
+        valid: data.valid,
+        hasPayload: !!data.payload,
+        isActive: data.payload?.isActive,
+        customerId: data.payload?.customerId,
+        role: data.payload?.role,
+        username: data.payload?.username
+      })
       
       if (data.valid && data.payload?.isActive && data.payload?.customerId) {
+        console.log('[AuthContext] Token is valid, storing and setting user...')
 
         // Store token only after successful verification
         localStorage.setItem('auth-token', token)
@@ -134,9 +147,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data.payload)
         setIsLoading(false) // Set loading to false before returning success
 
+        console.log('[AuthContext] Login successful!')
         return true
       } else {
-        console.error('AuthProvider: Token validation failed - invalid payload or missing customerId:', {
+        console.error('[AuthContext] Token validation failed - invalid payload or missing required fields:', {
           valid: data.valid,
           isActive: data.payload?.isActive,
           customerId: data.payload?.customerId,
@@ -146,7 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false
       }
     } catch (error) {
-      console.error('AuthProvider: Login failed:', error)
+      console.error('[AuthContext] Login failed with error:', error)
       setIsLoading(false)
       return false
     }

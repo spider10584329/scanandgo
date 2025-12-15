@@ -6,14 +6,22 @@ export async function POST(request: Request) {
     const { token } = await request.json()
     
     if (!token) {
-      return NextResponse.json({ error: 'Token is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Token is required', valid: false }, { status: 400 })
     }
 
     const payload = await verifyToken(token)
     
     if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+      console.error('[Verify Token] Invalid token - verification failed')
+      return NextResponse.json({ error: 'Invalid token', valid: false }, { status: 401 })
     }
+
+    console.log('[Verify Token] Token verified successfully:', {
+      userId: payload.userId,
+      role: payload.role,
+      customerId: payload.customerId,
+      isActive: payload.isActive
+    })
 
     return NextResponse.json({ 
       valid: true, 
@@ -28,6 +36,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Token verification error:', error)
-    return NextResponse.json({ error: 'Token verification failed' }, { status: 500 })
+    return NextResponse.json({ error: 'Token verification failed', valid: false }, { status: 500 })
   }
 }

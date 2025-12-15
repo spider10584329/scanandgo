@@ -21,9 +21,10 @@ export default function UserLogin() {
     setIsLoading(true)
     
     try {
-      const response = await axios.post('/api/user-login', {
-        username,
-        password
+      const response = await axios.post('/api/signin', {
+        email: username,
+        password,
+        role: 'agent'
       })
       
       if (response.data.success && response.data.token) {
