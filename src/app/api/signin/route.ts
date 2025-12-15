@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
           { success: false, message: 'Login failed: Please check your subscription status' },
           { status: 401 }
         )
-      } catch (apiError: any) {
+      } catch (apiError: unknown) {
         console.error('PulsePoint API error:', apiError)
         return NextResponse.json(
           { success: false, message: 'External authentication service unavailable' },
