@@ -3,22 +3,34 @@ import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/jwt'
 
 // Simple in-memory cache for duplicates (1 minute TTL for faster refresh)
+// NOTE: Cache cleanup is done lazily on access to avoid memory leaks from setInterval
 const cache = new Map<string, { data: unknown; timestamp: number }>()
-const CACHE_TTL = 1 * 60 * 1000 // 1 minute instead of 5
+const CACHE_TTL = 1 * 60 * 1000 // 1 minute
+const MAX_CACHE_SIZE = 100 // Limit cache size to prevent unbounded growth
 
-// Clean up expired cache entries periodically
-setInterval(() => {
+// Lazy cache cleanup function - called on each request instead of via setInterval
+function cleanupCache() {
   const now = Date.now()
   for (const [key, value] of cache.entries()) {
     if (now - value.timestamp > CACHE_TTL) {
       cache.delete(key)
     }
   }
-}, CACHE_TTL) // Clean up every minute
+  // Also enforce max size limit (remove oldest entries if over limit)
+  if (cache.size > MAX_CACHE_SIZE) {
+    const entries = Array.from(cache.entries())
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp)
+    const toRemove = entries.slice(0, cache.size - MAX_CACHE_SIZE)
+    toRemove.forEach(([key]) => cache.delete(key))
+  }
+}
 
 // GET - Fetch duplicate inventory records (optimized)
 export async function GET(request: NextRequest) {
   try {
+    // Lazy cache cleanup on each request (prevents memory leaks)
+    cleanupCache()
+
     // Get authorization header
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

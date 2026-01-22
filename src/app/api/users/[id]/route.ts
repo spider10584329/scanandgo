@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { verifyToken } from '@/lib/jwt'
-
-const prisma = new PrismaClient()
 
 // GET - Get specific user
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -63,8 +61,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -156,8 +152,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -240,7 +234,5 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

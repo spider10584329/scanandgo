@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { verifyToken } from '@/lib/jwt'
-
-const prisma = new PrismaClient()
 
 // POST - Reset user password
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -81,7 +79,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

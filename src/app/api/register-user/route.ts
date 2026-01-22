@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +35,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error: unknown) {
     console.error('Registration error:', error)
-    
+
     // Handle unique constraint violations
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
@@ -50,7 +48,5 @@ export async function POST(request: NextRequest) {
       { error: 'Registration failed' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

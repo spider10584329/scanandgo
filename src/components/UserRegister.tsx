@@ -33,30 +33,18 @@ export default function UserRegister({ onBackToLogin }: UserRegisterProps) {
     }
     
     try {
-      // Get the correct PulsePoint API URL from environment or use default
-      const apiUrl = process.env.NEXT_PUBLIC_PULSEPOINT_API_URL || 'https://api.pulsepoint.clinotag.com'
-      
-      console.log('[UserRegister] Checking admin email with PulsePoint API:', apiUrl)
-      const adminCheckResponse = await axios.get(`${apiUrl}/api/user/allusers`, {
-        auth: {
-          username: 'admin',
-          password: 'admin'
-        }
+      // Check if admin email exists via server-side API (keeps credentials secure)
+      console.log('[UserRegister] Checking admin email via server API')
+      const adminCheckResponse = await axios.post('/api/check-admin-email', {
+        email: adminEmail
       })
-      
-      const allUsers = adminCheckResponse.data?.data || adminCheckResponse.data || []
-      
-      // Check if admin email exists in the user list and get their ID
-      const adminUser = allUsers.find((user: { email?: string; id: number }) => 
-        user.email?.toLowerCase() === adminEmail.toLowerCase()
-      )
-      
-      if (!adminUser) {
+
+      if (!adminCheckResponse.data.exists) {
         toastError('Administrator address does not exist.')
         setIsLoading(false)
         return
       }
-      const customerId = adminUser.id      
+      const customerId = adminCheckResponse.data.customerId      
      
       // Check if username already exists in local database
       console.log('[UserRegister] Checking username availability:', username)

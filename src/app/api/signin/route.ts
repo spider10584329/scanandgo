@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { generateToken } from '@/lib/jwt'
 import { z } from 'zod'
 import axios from 'axios'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 const signinSchema = z.object({
   email: z.string().min(1, 'Email or username is required'),
@@ -39,8 +37,8 @@ export async function POST(request: NextRequest) {
           // Get user details from PulsePoint
           const userDetailsResponse = await axios.get(`${apiUrl}/api/user/allusers`, {
             auth: {
-              username: 'admin',
-              password: 'admin'
+              username: process.env.PULSEPOINT_API_USERNAME || '',
+              password: process.env.PULSEPOINT_API_PASSWORD || ''
             }
           })
 
@@ -137,120 +135,114 @@ export async function POST(request: NextRequest) {
           { success: false, message: 'External authentication service unavailable' },
           { status: 503 }
         )
-      } finally {
-        await prisma.$disconnect()
       }
     }
 
     // Handle Agent login (Local database authentication)
     if (validatedData.role === 'agent') {
-      try {
-        // Find user in operators table by username
-        console.log(`[Signin] Looking up agent with username:`, validatedData.email)
-        const user = await prisma.operators.findFirst({
-          where: { 
-            username: validatedData.email 
-          }
-        })
-
-        if (!user) {
-          console.log(`[Signin] Agent not found for username: ${validatedData.email}`)
-          return NextResponse.json(
-            { success: false, message: 'This account is not registered.' },
-            { status: 401 }
-          )
+      // Find user in operators table by username
+      console.log(`[Signin] Looking up agent with username:`, validatedData.email)
+      const user = await prisma.operators.findFirst({
+        where: {
+          username: validatedData.email
         }
+      })
 
-        console.log(`[Signin] Agent found:`, { 
-          id: user.id, 
-          username: user.username, 
-          isActive: user.isActive,
-          customer_id: user.customer_id,
-          hasPassword: !!user.password
-        })
-
-        // Check if account is active
-        if (!user.isActive || user.isActive === 0) {
-          console.log(`[Signin] Agent account is not active: isActive=${user.isActive}`)
-          return NextResponse.json(
-            { success: false, message: 'Account is not active.' },
-            { status: 403 }
-          )
-        }
-
-        // Verify password using bcrypt
-        console.log(`[Signin] Verifying agent password with bcrypt...`)
-        const isValidPassword = await bcrypt.compare(
-          validatedData.password,
-          user.password
+      if (!user) {
+        console.log(`[Signin] Agent not found for username: ${validatedData.email}`)
+        return NextResponse.json(
+          { success: false, message: 'This account is not registered.' },
+          { status: 401 }
         )
-        
-        console.log(`[Signin] Password verification result:`, isValidPassword)
-
-        if (!isValidPassword) {
-          console.log(`[Signin] Incorrect password for agent`)
-          return NextResponse.json(
-            { success: false, message: 'Incorrect password.' },
-            { status: 401 }
-          )
-        }
-
-        // Generate JWT token with agent role and customer_id
-        console.log(`[Signin] Agent authenticated, generating token...`)
-        const token = await generateToken({
-          customerId: user.customer_id,
-          userId: user.id,
-          username: user.username,
-          role: 'agent',
-          isActive: user.isActive === 1
-        })
-
-        // Return user data and token
-        const agentResponse = NextResponse.json(
-          {
-            success: true,
-            message: 'Login successful',
-            token,
-            user: {
-              customerId: user.customer_id,
-              id: user.id,
-              username: user.username,
-              role: 'agent'
-            },
-          },
-          { status: 200 }
-        )
-
-        // Set cookies
-        agentResponse.cookies.set('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60, // 7 days
-          path: '/',
-        })
-
-        agentResponse.cookies.set('auth-token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60, // 7 days
-          path: '/',
-        })
-
-        agentResponse.cookies.set('userRole', 'agent', {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60, // 7 days
-          path: '/',
-        })
-
-        console.log(`[Signin] Agent login successful`)
-        return agentResponse
-      } finally {
-        await prisma.$disconnect()
       }
+
+      console.log(`[Signin] Agent found:`, {
+        id: user.id,
+        username: user.username,
+        isActive: user.isActive,
+        customer_id: user.customer_id,
+        hasPassword: !!user.password
+      })
+
+      // Check if account is active
+      if (!user.isActive || user.isActive === 0) {
+        console.log(`[Signin] Agent account is not active: isActive=${user.isActive}`)
+        return NextResponse.json(
+          { success: false, message: 'Account is not active.' },
+          { status: 403 }
+        )
+      }
+
+      // Verify password using bcrypt
+      console.log(`[Signin] Verifying agent password with bcrypt...`)
+      const isValidPassword = await bcrypt.compare(
+        validatedData.password,
+        user.password
+      )
+
+      console.log(`[Signin] Password verification result:`, isValidPassword)
+
+      if (!isValidPassword) {
+        console.log(`[Signin] Incorrect password for agent`)
+        return NextResponse.json(
+          { success: false, message: 'Incorrect password.' },
+          { status: 401 }
+        )
+      }
+
+      // Generate JWT token with agent role and customer_id
+      console.log(`[Signin] Agent authenticated, generating token...`)
+      const token = await generateToken({
+        customerId: user.customer_id,
+        userId: user.id,
+        username: user.username,
+        role: 'agent',
+        isActive: user.isActive === 1
+      })
+
+      // Return user data and token
+      const agentResponse = NextResponse.json(
+        {
+          success: true,
+          message: 'Login successful',
+          token,
+          user: {
+            customerId: user.customer_id,
+            id: user.id,
+            username: user.username,
+            role: 'agent'
+          },
+        },
+        { status: 200 }
+      )
+
+      // Set cookies
+      agentResponse.cookies.set('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/',
+      })
+
+      agentResponse.cookies.set('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/',
+      })
+
+      agentResponse.cookies.set('userRole', 'agent', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/',
+      })
+
+      console.log(`[Signin] Agent login successful`)
+      return agentResponse
     }
 
     return NextResponse.json(
@@ -259,8 +251,6 @@ export async function POST(request: NextRequest) {
     )
 
   } catch (error) {
-    await prisma.$disconnect()
-    
     if (error instanceof z.ZodError) {
       console.error('[Signin] Validation error:', error.issues)
       return NextResponse.json(
