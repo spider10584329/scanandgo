@@ -96,3 +96,4 @@ class DeviceSignInResponse(BaseModel):
     access_token: str
     message: str
     status: int  # 1 = success
+    customer_id: int  # Customer ID assigned to the app user
