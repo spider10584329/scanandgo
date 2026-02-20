@@ -25,15 +25,35 @@ class APIClient {
   private baseURL: string
 
   constructor(baseURL: string) {
-    this.baseURL = baseURL
+    // Force empty string for Next.js proxy - ignore environment variable
+    this.baseURL = ''
+    console.log('[APIClient] Initialized with baseURL:', this.baseURL)
   }
 
   /**
    * Build URL with query parameters
    */
   private buildURL(endpoint: string, params?: Record<string, string | number | boolean | undefined>): string {
-    const url = new URL(`${this.baseURL}${endpoint}`)
+    // If baseURL is empty or relative, use relative URLs for Next.js proxy
+    if (!this.baseURL || !this.baseURL.startsWith('http')) {
+      let url = endpoint
+      if (params) {
+        const searchParams = new URLSearchParams()
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            searchParams.append(key, String(value))
+          }
+        })
+        const queryString = searchParams.toString()
+        if (queryString) {
+          url += `?${queryString}`
+        }
+      }
+      return url
+    }
 
+    // For absolute URLs (with http/https)
+    const url = new URL(`${this.baseURL}${endpoint}`)
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -41,7 +61,6 @@ class APIClient {
         }
       })
     }
-
     return url.toString()
   }
 

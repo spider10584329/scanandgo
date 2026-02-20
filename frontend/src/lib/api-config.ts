@@ -3,7 +3,9 @@
  * Base URL and endpoint definitions for Python FastAPI backend
  */
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// Use empty string for Next.js proxy in production/deployment
+// The Next.js server will proxy /api requests to the backend
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
 
 export const API_ENDPOINTS = {
   // Authentication
@@ -127,5 +129,12 @@ export const API_ENDPOINTS = {
   // ScanAndGo
   scanandgo: {
     inventory: '/api/scanandgo/inventory',
+  },
+
+  // Mobile Device Management (Agents)
+  agents: {
+    list: '/api/agents/list',
+    register: '/api/agents/register',
+    delete: (agentsId: number) => `/api/agents/${agentsId}`,
   },
 } as const

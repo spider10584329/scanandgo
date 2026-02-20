@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { apiClient } from '@/lib/api-client'
+import { API_ENDPOINTS } from '@/lib/api-config'
 import { toastSuccess, toastError } from '@/components/ui/toast'
 
 interface MobileDevice {
@@ -26,7 +27,7 @@ export default function MobileDevicePage() {
   const fetchDevices = async () => {
     try {
       setLoading(true)
-      const response = await apiClient.get('/api/agents/list') as { success: boolean; data: MobileDevice[] }
+      const response = await apiClient.get(API_ENDPOINTS.agents.list) as { success: boolean; data: MobileDevice[] }
       console.log('API Response:', response) // Debug log
       console.log('Devices:', response.data)
       if (response.success && response.data) {
@@ -48,7 +49,7 @@ export default function MobileDevicePage() {
 
     try {
       setSubmitting(true)
-      const response = await apiClient.post('/api/agents/register', null, {
+      const response = await apiClient.post(API_ENDPOINTS.agents.register, null, {
         params: { device_id: deviceId.trim() }
       }) as { success: boolean }
 
@@ -82,7 +83,7 @@ export default function MobileDevicePage() {
     }
 
     try {
-      const response = await apiClient.delete(`/api/agents/${agentsId}`) as { success: boolean }
+      const response = await apiClient.delete(API_ENDPOINTS.agents.delete(agentsId)) as { success: boolean }
       if (response.success) {
         toastSuccess('Device deleted successfully')
         fetchDevices() // Refresh list
