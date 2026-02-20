@@ -1,0 +1,42 @@
+DATABASE_URL="mysql://root@localhost:3306/scanandgo_prod"
+
+
+DB_HOST="localhost"
+DB_PORT="3306"
+DB_NAME="scanandgo_prod"
+DB_USER="root"
+DB_PASSWORD=""
+
+NODE_ENV="development"
+
+
+NEXTAUTH_URL="http://localhost:3000"
+
+NEXTAUTH_SECRET="qMNz0XN8Mv3iThVE0q2lBL3VviFPydWaSD/oNgpxcZg="
+
+APP_NAME="ScanAndGo"
+APP_VERSION="0.1.0"
+
+
+DEFAULT_ADMIN_EMAIL="admin@scanandgo.com"
+DEFAULT_ADMIN_PASSWORD="admin123"
+
+
+SESSION_MAX_AGE="43200"  # 12 hours in seconds
+
+BCRYPT_ROUNDS="12"
+
+# PulsePoint API Configuration
+PULSEPOINT_API_URL="https://api.pulsepoint.clinotag.com"
+NEXT_PUBLIC_PULSEPOINT_API_URL="https://api.pulsepoint.clinotag.com"
+PULSEPOINT_API_TIMEOUT="10000"
+PULSEPOINT_PROJECT_ID="20"
+# IMPORTANT: Set these credentials securely - do not use default values in production
+PULSEPOINT_API_USERNAME="admin"
+PULSEPOINT_API_PASSWORD="admin"
+
+
+DEBUG="false"
+
+
+PRISMA_DEBUG="false"
