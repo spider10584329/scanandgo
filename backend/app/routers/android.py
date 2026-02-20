@@ -24,11 +24,12 @@ from app.schemas.android import (
     AndroidItem,
     AndroidPostCategory,
     AndroidPostItem,
+    AndroidItemUpdateRequest,
     AndroidStatusVM,
     AndroidMessageVM,
     AndroidPostCheckItem,
     AndroidResponseCheckItem,
-    AndroidPostInventory,
+    AndroidDetectBarcodeRequest,
     AndroidResponseCheckTag,
     AndroidUpdateLocation,
     AndroidFixLocationStatusVM,
@@ -252,12 +253,12 @@ async def android_item_create(
 
 @router.put("/item/update", response_model=AndroidMessageVM)
 async def android_item_update(
-    request: AndroidPostItem,
+    request: AndroidItemUpdateRequest,
     id: int = Query(..., description="item id"),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Android: update item by id."""
+    """Android: partial update by id. App may send only {"name": "..."} (e.g. from PostCategory)."""
     item = (
         db.query(Item)
         .filter(
@@ -268,8 +269,10 @@ async def android_item_update(
     )
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    item.name = request.name
-    item.category_id = request.categoryId
+    if request.name is not None:
+        item.name = request.name
+    if request.categoryId is not None:
+        item.category_id = request.categoryId
     if request.barcode is not None:
         item.barcode = request.barcode
     db.commit()
@@ -327,36 +330,89 @@ async def android_inventory_barcodelist(
     return result
 
 
-# --- Inventory: detect barcode (single) ---
+# --- Inventory: detect barcode (unified: single or list) ---
 
 @router.post("/inventory/detect/barcode", response_model=AndroidResponseCheckTag)
 async def android_inventory_detect_barcode(
-    request: AndroidPostInventory,
+    request: AndroidDetectBarcodeRequest,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Android: classify one barcode as right/wrong/missing/unknown."""
-    barcode = request.barcode or ""
-    inv = (
-        db.query(Inventory)
-        .filter(
-            Inventory.customer_id == current_user.customerId,
-            Inventory.barcode == barcode,
-        )
-        .first()
-    )
-    if inv:
+    """
+    Android: classify barcode(s) as right/wrong/missing/unknown.
+    Supports two modes:
+    1. Single barcode: {"barcode": "BC001"} -> right_list or missing_list
+    2. List mode: {"detail_location_id": 5, "barcode_list": ["BC001", "BC002"]}
+       -> classifies each: right (at location), wrong (exists but elsewhere), missing (not found)
+    """
+    right_list = []
+    wrong_list = []
+    missing_list = []
+    unknown_list = []
+
+    # List mode: barcode_list is present (from InventoryActivity/FixActivity)
+    if request.barcode_list is not None and len(request.barcode_list) > 0:
+        expected_detail_location_id = request.detail_location_id
+
+        for barcode in request.barcode_list:
+            if not barcode or barcode.strip() == "":
+                continue
+
+            inv = (
+                db.query(Inventory)
+                .filter(
+                    Inventory.customer_id == current_user.customerId,
+                    Inventory.barcode == barcode,
+                )
+                .first()
+            )
+
+            if inv:
+                if expected_detail_location_id is not None:
+                    if inv.detail_location_id == expected_detail_location_id:
+                        right_list.append(barcode)
+                    else:
+                        wrong_list.append(barcode)
+                else:
+                    right_list.append(barcode)
+            else:
+                missing_list.append(barcode)
+
         return AndroidResponseCheckTag(
-            right_list=[barcode],
+            right_list=right_list,
+            wrong_list=wrong_list,
+            missing_list=missing_list,
+            unknown_list=unknown_list,
+        )
+
+    # Single barcode mode: only barcode field (backward compatibility)
+    elif request.barcode:
+        barcode = request.barcode
+        inv = (
+            db.query(Inventory)
+            .filter(
+                Inventory.customer_id == current_user.customerId,
+                Inventory.barcode == barcode,
+            )
+            .first()
+        )
+        if inv:
+            return AndroidResponseCheckTag(
+                right_list=[barcode],
+                wrong_list=[],
+                missing_list=[],
+                unknown_list=[],
+            )
+        return AndroidResponseCheckTag(
+            right_list=[],
             wrong_list=[],
-            missing_list=[],
+            missing_list=[barcode],
             unknown_list=[],
         )
-    return AndroidResponseCheckTag(
-        right_list=[],
-        wrong_list=[],
-        missing_list=[barcode],
-        unknown_list=[],
+
+    raise HTTPException(
+        status_code=400,
+        detail="Either 'barcode' or 'barcode_list' must be provided"
     )
 
 

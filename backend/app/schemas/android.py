@@ -54,6 +54,13 @@ class AndroidPostItem(BaseModel):
     barcode: Optional[str] = None
 
 
+class AndroidItemUpdateRequest(BaseModel):
+    """Partial update: app may send only name (e.g. from PostCategory)."""
+    name: Optional[str] = None
+    categoryId: Optional[int] = None
+    barcode: Optional[str] = None
+
+
 # --- Status/Message responses ---
 class AndroidStatusVM(BaseModel):
     status: int
@@ -102,6 +109,29 @@ class AndroidPostInventory(BaseModel):
     area_id: Optional[int] = None
     floor_id: Optional[int] = None
     detail_location_id: Optional[int] = None
+
+
+class AndroidDetectBarcodeRequest(BaseModel):
+    """
+    Unified request for /inventory/detect/barcode.
+    Accepts either:
+    - Single barcode mode: {"barcode": "BC001"} (AndroidPostInventory shape)
+    - List mode: {"detail_location_id": 5, "barcode_list": ["BC001", "BC002"]} (PostCheckTags shape)
+    """
+    # Single barcode mode (existing AndroidPostInventory shape)
+    barcode: Optional[str] = None
+    status: Optional[int] = None
+    photo: Optional[str] = None
+    comment: Optional[str] = None
+    category_id: Optional[int] = None
+    item_id: Optional[int] = None
+    building_id: Optional[int] = None
+    area_id: Optional[int] = None
+    floor_id: Optional[int] = None
+    detail_location_id: Optional[int] = None
+
+    # List mode (PostCheckTags shape)
+    barcode_list: Optional[List[str]] = None
 
 
 class AndroidResponseCheckTag(BaseModel):
