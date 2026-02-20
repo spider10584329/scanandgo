@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.operator import Operator
-from app.schemas.user import OperatorResponse
+from app.schemas.user import OperatorResponse, OperatorUpdate
 from app.schemas.common import SuccessResponse
 from app.utils.auth import get_password_hash
 from app.utils.dependencies import get_current_user
@@ -67,7 +67,7 @@ async def get_user(
 @router.patch("/{user_id}", response_model=SuccessResponse)
 async def update_user(
     user_id: int,
-    request: dict,
+    request: OperatorUpdate,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -81,20 +81,20 @@ async def update_user(
         raise HTTPException(status_code=404, detail="User not found")
 
     # Update username if provided
-    if "username" in request:
-        operator.username = request["username"]
+    if request.username is not None:
+        operator.username = request.username
     
     # Update account status if provided
-    if "isActive" in request:
-        operator.isActive = request["isActive"]
+    if request.isActive is not None:
+        operator.isActive = request.isActive
     
     # Update password request status if provided
-    if "isPasswordRequest" in request:
-        operator.isPasswordRequest = request["isPasswordRequest"]
+    if request.isPasswordRequest is not None:
+        operator.isPasswordRequest = request.isPasswordRequest
     
     # Reset password if provided (hash it before saving)
-    if "password" in request and request["password"]:
-        operator.password = get_password_hash(request["password"])
+    if request.password is not None and request.password:
+        operator.password = get_password_hash(request.password)
         operator.isPasswordRequest = 0  # Clear password request when password is reset
 
     db.commit()

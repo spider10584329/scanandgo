@@ -4,7 +4,7 @@ Authentication utilities - JWT token generation and verification
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 import logging
 
 from app.config import settings
@@ -12,21 +12,11 @@ from app.schemas.auth import TokenPayload
 
 logger = logging.getLogger(__name__)
 
-# Password hashing
-# Support multiple schemes for backward compatibility:
-# - bcrypt: preferred (new passwords)
-# - pbkdf2_sha256: legacy (old passwords from previous system)
-pwd_context = CryptContext(
-    schemes=["bcrypt", "pbkdf2_sha256"],
-    deprecated=["pbkdf2_sha256"]  # Mark pbkdf2_sha256 as deprecated but still verify
-)
-
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Verify a plain password against a hashed password.
+    Verify a plain password against a hashed password using bcrypt.
 
-    Supports both bcrypt and pbkdf2_sha256 for backward compatibility.
     Truncates passwords to 72 bytes for bcrypt compatibility.
 
     Args:
@@ -38,8 +28,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     try:
         # Truncate to 72 bytes for bcrypt compatibility
-        safe_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-        return pwd_context.verify(safe_password, hashed_password)
+        password_bytes = plain_password.encode('utf-8')[:72]
+        hashed_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
     except Exception as e:
         logger.error(f"Password verification error: {e}")
         return False
@@ -49,16 +40,21 @@ def get_password_hash(password: str) -> str:
     """
     Hash a password using bcrypt.
     Truncates passwords to 72 bytes for bcrypt compatibility.
+    
+    Note: bcrypt has a 72-byte limit. We truncate at the byte level
+    to ensure compatibility regardless of character encoding.
 
     Args:
-        password: Plain text password
+        password: Plain text password (max 255 chars accepted, auto-truncated to 72 bytes)
 
     Returns:
         bcrypt hashed password
     """
     # Truncate to 72 bytes for bcrypt compatibility
-    safe_password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-    return pwd_context.hash(safe_password)
+    password_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
 
 
 def create_access_token(data: dict) -> str:
