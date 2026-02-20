@@ -49,7 +49,8 @@ async def device_signin(request: DeviceSignInRequest, db: Session = Depends(get_
     return DeviceSignInResponse(
         access_token=token,
         message="Login successful",
-        status=1
+        status=1,
+        customer_id=agent.customer_id
     )
 
 
